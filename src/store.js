@@ -1,11 +1,12 @@
-const KEY = 'piyiquest.v1';
+const KEY = 'piyiquest.v2';
 const DB_NAME = 'piyiquest-photos';
+const EMPTY = () => ({ done: {}, opened: {} });
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) ?? { done: {} };
+    return { ...EMPTY(), ...JSON.parse(localStorage.getItem(KEY)) };
   } catch {
-    return { done: {} };
+    return EMPTY();
   }
 }
 
@@ -20,11 +21,16 @@ function save(state) {
 let state = load();
 
 export const store = {
-  isDone: (id) => Boolean(state.done[id]),
+  isDone: (n) => Boolean(state.done[n]),
   doneCount: () => Object.keys(state.done).length,
-  doneAt: (id) => state.done[id]?.at ?? null,
-  markDone(id) {
-    state.done[id] = { at: new Date().toISOString() };
+  markDone(n) {
+    state.done[n] = { at: new Date().toISOString() };
+    save(state);
+  },
+  isOpened: (chestId) => Boolean(state.opened[chestId]),
+  openedCount: () => Object.keys(state.opened).length,
+  markOpened(chestId) {
+    state.opened[chestId] = { at: new Date().toISOString() };
     save(state);
   },
   introSeen: () => Boolean(state.introSeen),
@@ -33,7 +39,7 @@ export const store = {
     save(state);
   },
   reset() {
-    state = { done: {} };
+    state = EMPTY();
     save(state);
     return clearPhotos();
   },
