@@ -72,7 +72,7 @@ export const CHESTS = [
     id: 2,
     title: 'Prueba de Fuerza',
     story: 'El Guardián de Hierro custodia la primera puerta. Solo quien levanta su propio límite puede cruzarla.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Zapatillas Cloudswift 3 ON' },
     tasks: [logic('Lógica 2A'), physical('Fuerza en la Speediance'), logic('Lógica 2B')],
   },
   {
@@ -128,7 +128,7 @@ export const CHESTS = [
     id: 10,
     title: 'El Jefe Final',
     story: 'Llegó el día. Diez kilómetros separan a la Velocista de Jade de la gloria, y al final espera el último guardián del Nivel 32.',
-    gift: { name: 'Zapatillas Cloudswift 3 ON' },
+    gift: GIFT_PENDING,
     tasks: [
       physical('La Gran Carrera', 'Correr el 10K. Foto en la meta o con la medalla.'),
       logic('El descanso del héroe'),
