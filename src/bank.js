@@ -89,6 +89,35 @@ const EQ3 = eq('Ecuaciones con emojis III', [
   seq('🍕 + 🍕 + 🍕 + 🍕 = 36 y 🍕 + 🥤 = 12. ¿Cuánto vale 🥤?', ['2', '3', '4', '5'], 1),
   seq('(🍰 + 3) × 2 = 20. ¿Cuánto vale 🍰?', ['5', '6', '7', '8'], 2),
 ]);
+const SEQ_C = {
+  type: 'quiz',
+  title: 'Secuencias del maestro',
+  questions: [
+    seq('¿Qué número sigue? 2, 3, 5, 8, 12, 17, …', ['22', '23', '24', '25'], 1),
+    seq('¿Qué número sigue? 1, 2, 6, 24, 120, …', ['240', '600', '720', '840'], 2),
+    seq('¿Qué número sigue? 3, 4, 6, 9, 13, 18, …', ['23', '24', '25', '26'], 1),
+    seq('¿Qué número sigue? 2, 5, 10, 17, 26, …', ['35', '36', '37', '38'], 2),
+    seq('¿Qué número sigue? 7, 14, 21, 35, 56, …', ['77', '84', '91', '98'], 2),
+    seq('¿Qué letra sigue? A, B, D, G, K, …', ['O', 'P', 'Q', 'R'], 1),
+  ],
+};
+const EQ5 = eq('Ecuaciones con emojis V', [
+  seq('🍎 + 🍌 = 🍓, 🍓 + 🍎 = 20 y 🍌 = 4. ¿Cuánto vale 🍓?', ['10', '12', '14', '16'], 1),
+  seq('🐘 × 🐭 = 36 y 🐘 − 🐭 = 5. ¿Cuánto vale 🐘?', ['8', '9', '10', '12'], 1),
+  seq('🔴 + 🔴 + 🔴 = 🔵 + 🔵 y 🔴 + 🔵 = 25. ¿Cuánto vale 🔵?', ['10', '12', '15', '20'], 2),
+  seq('(🥇 + 🥈) × 🥉 = 60 y 🥇 + 🥈 = 12. ¿Cuánto vale 🥉?', ['4', '5', '6', '8'], 1),
+]);
+const TRIVIA_FINAL = trivia('La trivia final', [
+  { q: '¿Cuál es el elemento más ligero de la tabla periódica?', options: ['Helio', 'Hidrógeno', 'Litio', 'Neón'], answer: 1 },
+  { q: '¿En qué año comenzó la Primera Guerra Mundial?', options: ['1912', '1914', '1916', '1918'], answer: 1 },
+  { q: '¿Cuál es la montaña más alta del mundo sobre el nivel del mar?', options: ['K2', 'Everest', 'Kilimanjaro', 'Aconcagua'], answer: 1 },
+  { q: '¿Quién compuso la «Novena Sinfonía», con el «Himno a la Alegría»?', options: ['Mozart', 'Beethoven', 'Bach', 'Chopin'], answer: 1 },
+  { q: '¿Cuál es el país más pequeño del mundo?', options: ['Mónaco', 'Vaticano', 'Malta', 'Liechtenstein'], answer: 1 },
+  { q: '¿Cuántos jugadores tiene en cancha cada equipo en un partido de fútbol?', options: ['9', '10', '11', '12'], answer: 2 },
+  { q: '¿Quién escribió «Cien años de soledad»?', options: ['Mario Vargas Llosa', 'Gabriel García Márquez', 'Julio Cortázar', 'Isabel Allende'], answer: 1 },
+  { q: '¿Cuál es el océano que baña las costas de Chile?', options: ['Atlántico', 'Índico', 'Pacífico', 'Ártico'], answer: 2 },
+]);
+
 const EQ4 = eq('Ecuaciones con emojis IV', [
   seq('🥇 = 🥈 + 3, 🥈 = 🥉 + 3 y 🥇 + 🥈 + 🥉 = 33. ¿Cuánto vale 🥉?', ['6', '7', '8', '9'], 2),
   seq('🚴 + 🚴 = 🏊 + 4 y 🏊 = 6. ¿Cuánto vale 🚴?', ['4', '5', '6', '10'], 1),
@@ -415,23 +444,27 @@ export const T0 = game(
 
 export const T1 = game(
   'La Gran Trivia',
-  'Antes de entrenar el cuerpo, hay que despertar la mente. Quince preguntas custodian la primera puerta.',
+  'Antes de entrenar el cuerpo, hay que despertar la mente. Once preguntas custodian la primera puerta.',
   'Responde la trivia, resuelve las ecuaciones y los acertijos.',
-  [TRIVIA_GENERAL, EQ1, L_OVEJAS, L_MESES],
+  [{ ...TRIVIA_GENERAL, questions: TRIVIA_GENERAL.questions.slice(0, 11) }, EQ1, L_OVEJAS, L_MESES],
 );
 export const T3 = game(
   'La Vuelta al Mundo',
   'Un mapa antiguo se despliega ante la heroína: banderas, países y capitales de todos los rincones.',
-  'Reconoce las 15 banderas, encuentra las capitales escondidas y resuelve el acertijo.',
-  [BANDERAS, CAPITALES, L_PASTILLAS],
+  'Reconoce las 10 banderas, encuentra las capitales escondidas y resuelve el acertijo.',
+  [
+    { ...BANDERAS, countries: BANDERAS.countries.slice(0, 10) },
+    { ...CAPITALES, size: 11, words: CAPITALES.words.slice(0, 9), prompt: 'Encuentra las 9 capitales. Toca la primera y la última letra de cada palabra.' },
+    L_PASTILLAS,
+  ],
 );
 export const T4 = game(
   'El Cuadro de Jade',
   'Nueve piedras de jade, nueve lugares, ninguna repetida. Los artesanos del reino te desafían.',
   'Completa los dos sudokus: cada fila, columna y recuadro lleva cada número una sola vez.',
   [
-    { type: 'sudoku', title: 'Sudoku del artesano (9×9)', size: 9, seed: 7, blanks: 40 },
-    { type: 'sudoku', title: 'Sudoku maestro (6×6)', seed: 19, blanks: 24 },
+    { type: 'sudoku', title: 'Sudoku del artesano (9×9)', size: 9, seed: 7, blanks: 34 },
+    { type: 'sudoku', title: 'Sudoku maestro (6×6)', seed: 19, blanks: 20 },
   ],
 );
 export const T6 = game(
@@ -439,8 +472,8 @@ export const T6 = game(
   'Dos laberintos de piedra guardan el último farol de la noche. Solo quien no se pierde llega a la luz.',
   'Atraviesa los laberintos, resuelve las ecuaciones y el acertijo.',
   [
-    { type: 'maze', title: 'Laberinto mediano', cols: 10, rows: 14, seed: 5 },
-    { type: 'maze', title: 'Laberinto grande', cols: 14, rows: 20, seed: 12 },
+    { type: 'maze', title: 'Laberinto mediano', cols: 9, rows: 12, seed: 5 },
+    { type: 'maze', title: 'Laberinto grande', cols: 12, rows: 16, seed: 12 },
     EQ2,
     L_HIJOS,
   ],
@@ -448,14 +481,17 @@ export const T6 = game(
 export const T7 = game(
   'El Crucigrama del Festín',
   'La biblioteca guarda un pergamino cuadriculado: sus palabras huelen a especias y a mar.',
-  'Completa el crucigrama de 13 palabras y encuentra todas las parejas.',
-  [CRUCI_COMIDA, MEM_ASIA],
+  'Completa el crucigrama de 10 palabras y encuentra todas las parejas.',
+  [
+    { ...CRUCI_COMIDA, entries: CRUCI_COMIDA.entries.slice(0, 10) },
+    { ...MEM_ASIA, cols: 4, pairs: MEM_ASIA.pairs.slice(0, 8) },
+  ],
 );
 export const T9 = game(
   'Las Doce Diferencias',
-  'Dos pergaminos casi idénticos esconden pequeños cambios. Los sabios también dejaron cuatro acertijos.',
+  'Dos pergaminos casi idénticos esconden pequeños cambios. Los sabios también dejaron tres acertijos.',
   'Encuentra las doce diferencias y resuelve los acertijos.',
-  [DIFF_DIMSUM, R_MAPA, R_TOALLA, R_SILENCIO, L_VELAS],
+  [DIFF_DIMSUM, R_MAPA, R_TOALLA, R_SILENCIO],
 );
 export const T10 = game(
   'Susurros en Chino',
@@ -508,39 +544,39 @@ export const T21 = game(
 export const T22 = game(
   'Los Sabios del Reino',
   'Los sabios aceptan solo a quien responde quince preguntas y descifra su mensaje secreto.',
-  'Responde las 15 preguntas, descifra el mensaje y resuelve el acertijo.',
-  [TRIVIA_2, CIPHER_2, R_FUTURO],
+  'Responde las 15 preguntas, descifra el mensaje y resuelve las ecuaciones y el acertijo.',
+  [TRIVIA_2, CIPHER_2, EQ5, R_FUTURO],
 );
 export const T24 = game(
   'El Santuario de los Atletas',
   'El equipaje de una gran atleta desaparece por partes. Después, el reino de China te examina.',
   'Detecta lo que falta y completa el crucigrama de 13 palabras.',
-  [MISSING_2, CRUCI_CHINA],
+  [{ ...MISSING_2, count: 6 }, CRUCI_CHINA],
 );
 export const T25 = game(
   'Palabras Desordenadas',
   'El viento revolvió las palabras del banquete. Hay que ponerlas en su sitio, y hacer unas cuentas.',
-  'Ordena las 10 palabras y resuelve las ecuaciones y el acertijo.',
-  [ANAGRAMAS_COMIDA, EQ4, L_HUEVO],
+  'Ordena las 10 palabras, resuelve las ecuaciones, las secuencias y el acertijo.',
+  [ANAGRAMAS_COMIDA, EQ4, SEQ_C, L_HUEVO],
 );
 export const T27 = game(
   'La Memoria del Reino',
   'Veinticuatro tesoros se esconden boca abajo. La víspera de la gran carrera, la memoria también se entrena.',
   'Encuentra las parejas, descifra el mensaje y completa el sudoku.',
-  [MEM_CHINA, CIPHER_3, { type: 'sudoku', title: 'Sudoku de la víspera (6×6)', seed: 61, blanks: 26 }],
+  [MEM_CHINA, CIPHER_3, { type: 'sudoku', title: 'Sudoku de la víspera (6×6)', seed: 61, blanks: 28 }],
 );
 export const T29 = game(
   'El Descanso del Héroe',
   'Tras la gran carrera, la mente trabaja mientras el cuerpo descansa. Un sudoku difícil y un laberinto largo te esperan.',
   'Resuelve el sudoku de 9×9 y cruza el laberinto grande.',
   [
-    { type: 'sudoku', title: 'Sudoku del descanso (9×9)', size: 9, seed: 55, blanks: 46 },
-    { type: 'maze', title: 'El gran laberinto', cols: 16, rows: 22, seed: 31 },
+    { type: 'sudoku', title: 'Sudoku del descanso (9×9)', size: 9, seed: 55, blanks: 50 },
+    { type: 'maze', title: 'El gran laberinto', cols: 18, rows: 24, seed: 31 },
   ],
 );
 export const T30 = game(
   'El Jefe Final',
   'El último guardián del Nivel 32 hace sus preguntas finales. Responde con todo lo aprendido.',
-  'Completa el crucigrama, escucha el mensaje, descifra el código y contesta el acertijo.',
-  [CRUCI_FINAL, CHINO_FINAL, CIPHER_FINAL, R_FINAL],
+  'Completa el crucigrama, responde la trivia final, escucha el mensaje, descifra el código y contesta el acertijo.',
+  [CRUCI_FINAL, TRIVIA_FINAL, CHINO_FINAL, CIPHER_FINAL, R_FINAL],
 );
