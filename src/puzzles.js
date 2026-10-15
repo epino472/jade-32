@@ -1,3 +1,5 @@
+import { SCENES } from './scenes.js';
+
 const strip = (s) =>
   s
     .normalize('NFD')
@@ -576,7 +578,489 @@ function maze(root, puzzle, onSolved) {
   draw();
 }
 
-const TYPES = { quiz, riddle, listen, wordsearch, flags, sudoku, maze };
+/* ---------- Crucigrama (distribución automática) ---------- */
+function crosswordLayout(entries, seed) {
+  const words = entries.map((e) => ({ ...e, word: strip(e.answer).toUpperCase() }));
+  const byLength = [...words].sort((a, b) => b.word.length - a.word.length);
+  let best = null;
+  for (let attempt = 0; attempt < 600; attempt++) {
+    const rand = mulberry32(seed + attempt * 101);
+    const [first, ...others] = byLength;
+    const order = [first, ...seededShuffle(others, rand)];
+    const cells = new Map();
+    const placed = [];
+    const get = (r, c) => cells.get(`${r},${c}`);
+    const fits = (word, r, c, dir) => {
+      const dr = dir === 'down' ? 1 : 0;
+      const dc = dir === 'across' ? 1 : 0;
+      if (get(r - dr, c - dc) || get(r + dr * word.length, c + dc * word.length)) return -1;
+      let crosses = 0;
+      for (let i = 0; i < word.length; i++) {
+        const rr = r + dr * i;
+        const cc = c + dc * i;
+        const cur = get(rr, cc);
+        if (cur) {
+          if (cur.ch !== word[i] || cur[dir]) return -1;
+          crosses += 1;
+        } else if (get(rr + dc, cc + dr) || get(rr - dc, cc - dr)) return -1;
+      }
+      return crosses;
+    };
+    const put = (entry, r, c, dir) => {
+      const dr = dir === 'down' ? 1 : 0;
+      const dc = dir === 'across' ? 1 : 0;
+      for (let i = 0; i < entry.word.length; i++) {
+        const key = `${r + dr * i},${c + dc * i}`;
+        const cell = cells.get(key) ?? { ch: entry.word[i] };
+        cell[dir] = true;
+        cells.set(key, cell);
+      }
+      placed.push({ ...entry, r, c, dir });
+    };
+    put(order[0], 0, 0, 'across');
+    let ok = true;
+    for (const entry of order.slice(1)) {
+      const options = [];
+      for (const p of placed) {
+        const dir = p.dir === 'across' ? 'down' : 'across';
+        for (let i = 0; i < p.word.length; i++) {
+          const pr = p.dir === 'across' ? p.r : p.r + i;
+          const pc = p.dir === 'across' ? p.c + i : p.c;
+          for (let j = 0; j < entry.word.length; j++) {
+            if (entry.word[j] !== p.word[i]) continue;
+            const r = dir === 'down' ? pr - j : pr;
+            const c = dir === 'across' ? pc - j : pc;
+            const crosses = fits(entry.word, r, c, dir);
+            if (crosses >= 1) options.push({ r, c, dir, crosses });
+          }
+        }
+      }
+      if (!options.length) {
+        ok = false;
+        break;
+      }
+      const top = Math.max(...options.map((o) => o.crosses));
+      const best = options.filter((o) => o.crosses === top);
+      const pick = best[Math.floor(rand() * best.length)];
+      put(entry, pick.r, pick.c, pick.dir);
+    }
+    if (!ok) continue;
+
+    const minR = Math.min(...placed.map((p) => p.r));
+    const minC = Math.min(...placed.map((p) => p.c));
+    const shifted = placed.map((p) => ({ ...p, r: p.r - minR, c: p.c - minC }));
+    const maxR = Math.max(...shifted.map((p) => (p.dir === 'down' ? p.r + p.word.length - 1 : p.r)));
+    const maxC = Math.max(...shifted.map((p) => (p.dir === 'across' ? p.c + p.word.length - 1 : p.c)));
+    const starts = [...new Set(shifted.map((p) => `${p.r},${p.c}`))]
+      .map((k) => k.split(',').map(Number))
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    const numberAt = new Map(starts.map(([r, c], i) => [`${r},${c}`, i + 1]));
+    const candidate = {
+      entries: shifted.map((p) => ({ ...p, num: numberAt.get(`${p.r},${p.c}`) })),
+      width: maxC + 1,
+      height: maxR + 1,
+      numberAt,
+    };
+    const score = (l) => Math.max(l.width, l.height) * 1000 + l.width * l.height;
+    if (!best || score(candidate) < score(best)) best = candidate;
+  }
+  return best;
+}
+
+function crossword(root, puzzle, onSolved) {
+  const layout = crosswordLayout(puzzle.entries, puzzle.seed ?? 1);
+  if (!layout) {
+    root.append(el('p', 'feedback bad', 'No se pudo armar el crucigrama.'));
+    return;
+  }
+  const letterAt = new Map();
+  for (const e of layout.entries) {
+    for (let i = 0; i < e.word.length; i++) {
+      const r = e.dir === 'down' ? e.r + i : e.r;
+      const c = e.dir === 'across' ? e.c + i : e.c;
+      letterAt.set(`${r},${c}`, { ch: e.word[i], node: null });
+    }
+  }
+  const grid = el('div', 'cw-grid');
+  grid.style.setProperty('--cols', layout.width);
+  for (let r = 0; r < layout.height; r++) {
+    for (let c = 0; c < layout.width; c++) {
+      const key = `${r},${c}`;
+      const slot = letterAt.get(key);
+      if (!slot) {
+        grid.append(el('div', 'cw-void'));
+        continue;
+      }
+      const cell = el('div', 'cw-cell');
+      const num = layout.numberAt.get(key);
+      if (num) cell.append(el('span', 'cw-num', String(num)));
+      slot.node = el('span', 'cw-ch');
+      cell.append(slot.node);
+      grid.append(cell);
+    }
+  }
+
+  let remaining = layout.entries.length;
+  const makeList = (dir, title) => {
+    const list = el('div', 'cw-clues');
+    list.append(el('h4', '', title));
+    for (const e of layout.entries.filter((x) => x.dir === dir).sort((a, b) => a.num - b.num)) {
+      const row = el('label', 'cw-clue');
+      row.append(el('span', 'cw-clue-text', `${e.num}. ${e.clue} (${e.word.length})`));
+      const input = el('input', 'text-input');
+      input.type = 'text';
+      input.maxLength = e.word.length;
+      input.autocomplete = 'off';
+      input.autocapitalize = 'none';
+      input.spellcheck = false;
+      input.placeholder = '·'.repeat(e.word.length);
+      input.addEventListener('input', () => {
+        if (strip(input.value).toUpperCase() !== e.word) return;
+        input.disabled = true;
+        row.classList.add('solved');
+        for (let i = 0; i < e.word.length; i++) {
+          const r = e.dir === 'down' ? e.r + i : e.r;
+          const c = e.dir === 'across' ? e.c + i : e.c;
+          letterAt.get(`${r},${c}`).node.textContent = e.word[i];
+        }
+        remaining -= 1;
+        if (remaining === 0) onSolved();
+      });
+      row.append(input);
+      list.append(row);
+    }
+    return list;
+  };
+  root.append(
+    el('p', 'q-text', puzzle.prompt ?? 'Escribe cada respuesta junto a su pista. Las letras que aciertes se completan en la cuadrícula.'),
+    grid,
+    makeList('across', 'Horizontales'),
+    makeList('down', 'Verticales'),
+  );
+}
+
+/* ---------- Memoria ---------- */
+function memory(root, puzzle, onSolved) {
+  const rand = mulberry32(puzzle.seed ?? 3);
+  const deck = seededShuffle([...puzzle.pairs, ...puzzle.pairs], rand);
+  const info = el('p', 'diff-count', 'Movimientos: 0');
+  const board = el('div', 'mem-grid');
+  board.style.setProperty('--cols', puzzle.cols ?? 4);
+  let first = null;
+  let lock = false;
+  let matched = 0;
+  let moves = 0;
+  const cards = deck.map((symbol, i) => {
+    const card = el('button', 'mem-card');
+    card.type = 'button';
+    card.append(el('span', 'mem-face', symbol));
+    card.addEventListener('click', () => {
+      if (lock || card.classList.contains('up') || card.classList.contains('ok')) return;
+      card.classList.add('up');
+      if (first === null) {
+        first = i;
+        return;
+      }
+      moves += 1;
+      info.textContent = `Movimientos: ${moves}`;
+      if (deck[first] === symbol) {
+        cards[first].classList.add('ok');
+        card.classList.add('ok');
+        first = null;
+        matched += 1;
+        if (matched === puzzle.pairs.length) onSolved();
+      } else {
+        lock = true;
+        const previous = first;
+        first = null;
+        setTimeout(() => {
+          cards[previous].classList.remove('up');
+          card.classList.remove('up');
+          lock = false;
+        }, 750);
+      }
+    });
+    board.append(card);
+    return card;
+  });
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Encuentra todas las parejas.'), info, board);
+}
+
+/* ---------- Encuentra las diferencias ---------- */
+function diffs(root, puzzle, onSolved) {
+  const scene = SCENES[puzzle.scene];
+  const found = new Set();
+  const NS = 'http://www.w3.org/2000/svg';
+  const makeSvg = (inner) => {
+    const svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', scene.viewBox);
+    svg.setAttribute('class', 'diff-svg');
+    svg.innerHTML = `${inner}<g class="marks"></g>`;
+    return svg;
+  };
+  const left = makeSvg(scene.shapes.map((s) => s.svg).join(''));
+  const right = makeSvg(
+    scene.shapes
+      .map((s) => {
+        const d = scene.diffs.find((x) => x.id === s.id);
+        return d ? d.alt : s.svg;
+      })
+      .join('') +
+      scene.diffs
+        .filter((d) => d.add)
+        .map((d) => d.add)
+        .join(''),
+  );
+  const counter = el('p', 'diff-count');
+  const update = () => {
+    counter.textContent = `Diferencias encontradas: ${found.size} de ${scene.diffs.length}`;
+  };
+  const mark = (index) => {
+    const [x, y, r] = scene.diffs[index].hit;
+    for (const svg of [left, right]) {
+      const circle = document.createElementNS(NS, 'circle');
+      circle.setAttribute('cx', x);
+      circle.setAttribute('cy', y);
+      circle.setAttribute('r', Math.max(r, 14));
+      circle.setAttribute('class', 'diff-mark');
+      svg.querySelector('.marks').append(circle);
+    }
+  };
+  const onTap = (svg) => (e) => {
+    const point = svg.createSVGPoint();
+    point.x = e.clientX;
+    point.y = e.clientY;
+    const p = point.matrixTransform(svg.getScreenCTM().inverse());
+    const index = scene.diffs.findIndex(
+      (d, i) => !found.has(i) && Math.hypot(p.x - d.hit[0], p.y - d.hit[1]) <= d.hit[2],
+    );
+    if (index >= 0) {
+      found.add(index);
+      mark(index);
+      update();
+      if (found.size === scene.diffs.length) onSolved();
+    } else {
+      svg.classList.add('miss');
+      setTimeout(() => svg.classList.remove('miss'), 350);
+    }
+  };
+  left.addEventListener('click', onTap(left));
+  right.addEventListener('click', onTap(right));
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Hay diferencias entre las dos imágenes. Tócalas en cualquiera de las dos.'), counter, left, right);
+  update();
+}
+
+/* ---------- Objetos faltantes ---------- */
+function missing(root, puzzle, onSolved) {
+  const rand = mulberry32(puzzle.seed ?? 4);
+  const objects = puzzle.objects;
+  const gone = new Set(seededShuffle(objects, rand).slice(0, puzzle.count ?? 3));
+  const shelf = el('div', 'shelf');
+  const draw = (hide) =>
+    shelf.replaceChildren(...objects.map((o) => el('span', 'slot', hide && gone.has(o) ? '' : o)));
+  const body = el('div', 'stage-body');
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Memoriza los objetos. Después desaparecerán algunos: dime cuáles.'), shelf, body);
+
+  const showMemorize = () => {
+    draw(false);
+    const go = el('button', 'btn primary', 'Ya los memoricé');
+    go.addEventListener('click', showGuess);
+    body.replaceChildren(go);
+  };
+
+  let peeks = 2;
+  function showGuess() {
+    draw(true);
+    const chosen = new Set();
+    const palette = el('div', 'palette');
+    for (const o of objects) {
+      const chip = el('button', 'chip', o);
+      chip.type = 'button';
+      chip.addEventListener('click', () => {
+        if (chosen.has(o)) chosen.delete(o);
+        else chosen.add(o);
+        chip.classList.toggle('sel', chosen.has(o));
+      });
+      palette.append(chip);
+    }
+    const msg = el('p', 'feedback');
+    const check = el('button', 'btn primary', 'Comprobar');
+    check.addEventListener('click', () => {
+      const ok = chosen.size === gone.size && [...chosen].every((o) => gone.has(o));
+      if (ok) {
+        msg.textContent = '¡Exacto!';
+        msg.className = 'feedback good';
+        check.disabled = true;
+        draw(true);
+        onSolved();
+      } else {
+        msg.textContent = `Todavía no. Faltan ${gone.size} objetos: revisa tu elección.`;
+        msg.className = 'feedback bad';
+      }
+    });
+    const peek = el('button', 'btn ghost', `Ver de nuevo (${peeks})`);
+    peek.addEventListener('click', () => {
+      if (peeks <= 0) return;
+      peeks -= 1;
+      peek.textContent = `Ver de nuevo (${peeks})`;
+      draw(false);
+      setTimeout(() => draw(true), 3000);
+    });
+    body.replaceChildren(el('p', 'q-text', '¿Cuáles desaparecieron?'), palette, msg, check, peek);
+  }
+  showMemorize();
+}
+
+/* ---------- Anagramas ---------- */
+function anagram(root, puzzle, onSolved) {
+  const rand = mulberry32(puzzle.seed ?? 2);
+  let remaining = puzzle.words.length;
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Ordena las letras para formar la palabra de la pista.'));
+  for (const item of puzzle.words) {
+    const word = strip(item.answer).toUpperCase();
+    let letters = word.split('');
+    let tries = 0;
+    do {
+      letters = seededShuffle(letters, rand);
+      tries += 1;
+    } while (letters.join('') === word && tries < 20);
+    const row = el('label', 'cw-clue');
+    row.append(el('span', 'anagram-letters', letters.join(' ')), el('span', 'cw-clue-text', item.clue));
+    const input = el('input', 'text-input');
+    input.type = 'text';
+    input.autocomplete = 'off';
+    input.autocapitalize = 'none';
+    input.spellcheck = false;
+    input.placeholder = 'Tu respuesta';
+    input.addEventListener('input', () => {
+      if (strip(input.value).toUpperCase() !== word) return;
+      input.disabled = true;
+      row.classList.add('solved');
+      remaining -= 1;
+      if (remaining === 0) onSolved();
+    });
+    row.append(input);
+    root.append(row);
+  }
+}
+
+/* ---------- Chino básico: varias frases con audio y pinyin ---------- */
+function listenSet(root, puzzle, onSolved) {
+  let remaining = puzzle.items.length;
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Toca el altavoz, escucha y elige qué significa. Si lo necesitas, abre el pinyin.'));
+  puzzle.items.forEach((item, i) => {
+    const block = el('div', 'q-block');
+    const head = el('div', 'listen-row');
+    const play = el('button', 'btn small', '🔊');
+    play.type = 'button';
+    play.addEventListener('click', () => {
+      if (!speak(item.speak)) root.querySelectorAll('details.pinyin').forEach((d) => (d.open = true));
+    });
+    head.append(play, el('span', 'q-text', item.q ?? `Frase ${i + 1}: ¿qué significa?`));
+    const pinyin = el('details', 'hint pinyin');
+    pinyin.append(el('summary', '', 'Ver pinyin'), el('p', '', item.pinyin));
+    const opts = el('div', 'q-options');
+    let done = false;
+    item.options.forEach((label, oi) => {
+      const btn = el('button', 'opt', label);
+      btn.type = 'button';
+      btn.addEventListener('click', () => {
+        if (done) return;
+        if (oi === item.answer) {
+          done = true;
+          btn.classList.add('ok');
+          remaining -= 1;
+          if (remaining === 0) onSolved();
+        } else {
+          btn.classList.add('bad');
+          setTimeout(() => btn.classList.remove('bad'), 700);
+        }
+      });
+      opts.append(btn);
+    });
+    block.append(head, pinyin, opts);
+    root.append(block);
+  });
+}
+
+/* ---------- Rompecabezas deslizante con la ilustración de Piyi ---------- */
+function slide(root, puzzle, onSolved) {
+  const n = puzzle.size ?? 3;
+  const rand = mulberry32(puzzle.seed ?? 6);
+  const blank = n * n - 1;
+  const tiles = [...Array(n * n).keys()];
+  let empty = blank;
+  const neighbors = (i) => {
+    const r = Math.floor(i / n);
+    const c = i % n;
+    return [r > 0 && i - n, r < n - 1 && i + n, c > 0 && i - 1, c < n - 1 && i + 1].filter((x) => x !== false);
+  };
+  let last = -1;
+  for (let k = 0; k < n * n * 25; k++) {
+    const options = neighbors(empty).filter((x) => x !== last);
+    const pick = options[Math.floor(rand() * options.length)];
+    [tiles[empty], tiles[pick]] = [tiles[pick], tiles[empty]];
+    last = empty;
+    empty = pick;
+  }
+  let moves = 0;
+  let finished = false;
+  const info = el('p', 'diff-count', 'Movimientos: 0');
+  const board = el('div', 'slide-grid');
+  board.style.setProperty('--n', n);
+  const preview = el('img', 'slide-preview');
+  preview.src = puzzle.image;
+  preview.alt = 'Imagen de referencia';
+
+  const paint = () => {
+    board.replaceChildren(
+      ...tiles.map((v, i) => {
+        const tile = el('button', 'slide-tile');
+        tile.type = 'button';
+        if (v === blank) {
+          tile.classList.add('blank');
+        } else {
+          tile.style.backgroundImage = `url(${puzzle.image})`;
+          tile.style.backgroundSize = `${n * 100}% ${n * 100}%`;
+          tile.style.backgroundPosition = `${((v % n) / (n - 1)) * 100}% ${(Math.floor(v / n) / (n - 1)) * 100}%`;
+          tile.append(el('span', 'slide-num', String(v + 1)));
+        }
+        tile.addEventListener('click', () => {
+          if (finished || v === blank || !neighbors(i).includes(empty)) return;
+          [tiles[i], tiles[empty]] = [tiles[empty], tiles[i]];
+          empty = i;
+          moves += 1;
+          info.textContent = `Movimientos: ${moves}`;
+          paint();
+          if (tiles.every((x, idx) => x === idx)) {
+            finished = true;
+            onSolved();
+          }
+        });
+        return tile;
+      }),
+    );
+  };
+  paint();
+  root.append(el('p', 'q-text', puzzle.prompt ?? 'Desliza las piezas hasta armar la imagen. Toca una pieza al lado del espacio vacío.'), preview, info, board);
+}
+
+const TYPES = {
+  quiz,
+  riddle,
+  listen,
+  wordsearch,
+  flags,
+  sudoku,
+  maze,
+  crossword,
+  memory,
+  diffs,
+  missing,
+  anagram,
+  listenSet,
+  slide,
+};
 
 export function renderPuzzles(root, puzzles, onAllSolved) {
   root.replaceChildren();

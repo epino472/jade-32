@@ -951,6 +951,207 @@ small {
   grid-row: 2;
 }
 
+/* ---------- Crucigrama, memoria, diferencias, objetos, anagramas, rompecabezas ---------- */
+.cw-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  gap: 2px;
+  width: 100%;
+}
+.cw-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+}
+.cw-void {
+  aspect-ratio: 1;
+}
+.cw-num {
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  font-size: 0.5rem;
+  line-height: 1;
+  color: var(--gold);
+}
+.cw-ch {
+  font-family: var(--serif);
+  font-weight: 700;
+  font-size: clamp(0.7rem, 3.2vw, 1.05rem);
+  color: var(--jade);
+}
+.cw-clues {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.cw-clues h4 {
+  margin: 0;
+  color: var(--gold);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.cw-clue {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cw-clue.solved .cw-clue-text {
+  color: var(--jade);
+}
+.cw-clue.solved input {
+  opacity: 0.65;
+}
+.anagram-letters {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  letter-spacing: 0.35em;
+  color: var(--gold);
+}
+
+.mem-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 8px;
+}
+.mem-card {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 12px;
+  border: 1px solid var(--line-strong);
+  background: linear-gradient(160deg, #2c7a60, #164536);
+  font-size: 1.9rem;
+}
+.mem-card .mem-face {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.mem-card:not(.up):not(.ok)::before {
+  content: '玉';
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 1.4rem;
+}
+.mem-card.up,
+.mem-card.ok {
+  background: rgba(255, 255, 255, 0.12);
+}
+.mem-card.up .mem-face,
+.mem-card.ok .mem-face {
+  opacity: 1;
+}
+.mem-card.ok {
+  border-color: var(--jade);
+}
+
+.diff-count {
+  margin: 0;
+  text-align: center;
+  color: var(--gold);
+  font-weight: 600;
+}
+.diff-svg {
+  display: block;
+  width: 100%;
+  border-radius: 12px;
+  border: 2px solid var(--line);
+  touch-action: manipulation;
+}
+.diff-svg.miss {
+  border-color: var(--cinnabar);
+}
+.diff-mark {
+  fill: none;
+  stroke: var(--jade);
+  stroke-width: 3;
+}
+
+.shelf {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 12px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #5b3a29, #3f281c);
+  border: 1px solid var(--line-strong);
+}
+.slot {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  font-size: 1.9rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+}
+.palette {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.chip {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 0;
+  font-size: 1.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+}
+.chip.sel {
+  background: rgba(95, 227, 180, 0.25);
+  border-color: var(--jade);
+}
+
+.listen-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.listen-row .btn.small {
+  padding: 10px 14px;
+}
+
+.slide-preview {
+  display: block;
+  width: 84px;
+  margin: 0 auto;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+}
+.slide-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 3px;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.slide-tile {
+  appearance: none;
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background-color: #222;
+}
+.slide-tile.blank {
+  background: rgba(255, 255, 255, 0.05);
+}
+.slide-num {
+  position: absolute;
+  left: 4px;
+  top: 2px;
+  font-size: 0.7rem;
+  color: #fff;
+  text-shadow: 0 1px 3px #000;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
