@@ -95,7 +95,7 @@ export const CHESTS = [
         'El Ritmo de Jade',
         'Un esfuerzo continuo y parejo: se cuenta el tiempo del reloj.',
         'Los sabios enseñan que el verdadero ritmo no es el más rápido, sino el que puedes sostener.',
-        ['10 minutos de trote suave de calentamiento', '5 km en 28 minutos o menos', '5 minutos de trote suave para volver a la calma'],
+        ['10 minutos de trote suave de calentamiento', '5 km en 27 minutos o menos', '5 minutos de trote suave para volver a la calma'],
       ), logic('Lógica 3B')],
   },
   {
@@ -143,7 +143,7 @@ export const CHESTS = [
         'Ensayo General',
         'Controla el ritmo: que los tres kilómetros salgan casi iguales.',
         'Falta una semana para la gran carrera. El reino ensaya contigo, kilómetro a kilómetro.',
-        ['10 minutos de trote suave de calentamiento', '3 repeticiones de 1 km a 5:35 por km (tu ritmo de carrera), con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
+        ['10 minutos de trote suave de calentamiento', '3 repeticiones de 1 km a 5:25 por km (tu ritmo de carrera), con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
       ), logic('Lógica 7B')],
   },
   {
