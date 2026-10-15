@@ -1167,6 +1167,178 @@ small {
   text-shadow: 0 1px 3px #000;
 }
 
+/* ---------- Hanoi, Lights Out, adivina la palabra, nonograma ---------- */
+.hn-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.hn-peg {
+  appearance: none;
+  position: relative;
+  min-height: 210px;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.hn-peg::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 6px;
+  left: 50%;
+  width: 6px;
+  margin-left: -3px;
+  background: var(--gold);
+  opacity: 0.45;
+  border-radius: 3px;
+}
+.hn-peg.sel {
+  border-color: var(--jade);
+  background: rgba(95, 227, 180, 0.12);
+}
+.hn-disc {
+  position: relative;
+  z-index: 1;
+  height: 22px;
+  border-radius: 11px;
+  background: hsl(var(--hue) 55% 48%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.lo-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  gap: 6px;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+.lo-cell {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--line-strong);
+  background: rgba(255, 255, 255, 0.05);
+}
+.lo-cell.on {
+  background: radial-gradient(circle, #ffe9a8 0%, var(--gold) 60%, #b8902f 100%);
+  box-shadow: 0 0 14px rgba(242, 193, 78, 0.55);
+}
+
+.wd-board {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+.wd-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.wd-cell {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--line-strong);
+  border-radius: 8px;
+  font-family: var(--serif);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.wd-cell.correct,
+.wd-key.correct {
+  background: #2c7a60;
+  border-color: #2c7a60;
+}
+.wd-cell.present,
+.wd-key.present {
+  background: #a9822a;
+  border-color: #a9822a;
+}
+.wd-cell.absent,
+.wd-key.absent {
+  background: #3a3a44;
+  border-color: #3a3a44;
+}
+.wd-keys {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wd-keyrow {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.wd-key {
+  appearance: none;
+  flex: 1;
+  max-width: 36px;
+  padding: 13px 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ivory);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.wd-key.wide {
+  max-width: 58px;
+  font-size: 0.7rem;
+}
+
+.ng-grid {
+  display: grid;
+  grid-template-columns: auto repeat(var(--cols), 1fr);
+  gap: 2px;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+}
+.ng-clue {
+  display: flex;
+  color: var(--gold);
+  font-size: 0.8rem;
+  line-height: 1.15;
+}
+.ng-clue.col {
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 3px;
+}
+.ng-clue.row {
+  justify-content: flex-end;
+  align-items: center;
+  gap: 4px;
+  padding-right: 6px;
+}
+.ng-cell {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--muted);
+}
+.ng-cell.fill {
+  background: var(--jade);
+  border-color: var(--jade);
+}
+.ng-cell.cross::before {
+  content: '×';
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

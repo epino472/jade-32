@@ -580,3 +580,27 @@ export const T30 = game(
   'Completa el crucigrama, responde la trivia final, escucha el mensaje, descifra el código y contesta el acertijo.',
   [CRUCI_FINAL, TRIVIA_FINAL, CHINO_FINAL, CIPHER_FINAL, R_FINAL],
 );
+
+/* ---------- Práctica extra (no cuenta dentro de las 30) ---------- */
+export const P2 = game(
+  'Juegos nuevos',
+  'Los guardianes del reino prueban juegos que todavía no has visto. Son solo de práctica, y quieren saber qué te parecen.',
+  'Resuelve los cuatro juegos nuevos. Esta práctica no cuenta dentro de las treinta pruebas.',
+  [
+    { type: 'hanoi', title: 'La Torre de Hanoi', discs: 5 },
+    { type: 'lightsout', title: 'Apaga las luces', size: 5, seed: 4 },
+    { type: 'wordle', title: 'Adivina la palabra', words: ['TIGRE', 'RITMO', 'FAROL'] },
+    {
+      type: 'nonogram',
+      title: 'El dibujo escondido',
+      art: ['.XX..XX.', 'XXXXXXXX', 'XXXXXXXX', 'XX.XXXXX', '.XXXXXX.', '..XXXX..', '...XX...'],
+    },
+  ],
+);
+export const P3 = {
+  type: 'F',
+  title: 'Prueba de la cámara',
+  story: 'Antes de comenzar, hay que comprobar que tu cámara funciona. Es una prueba rápida y sin esfuerzo.',
+  objective: 'Toma una foto de tus zapatillas favoritas para entrenar. Solo comprobamos que la foto se sube bien.',
+  checklist: ['Toma la foto con tu cámara o elígela de tu galería', 'Súbela abajo y marca la prueba como hecha'],
+};

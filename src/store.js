@@ -22,7 +22,7 @@ let state = load();
 
 export const store = {
   isDone: (n) => Boolean(state.done[n]),
-  doneCount: () => Object.keys(state.done).filter((k) => k !== '0').length,
+  doneCount: () => Object.keys(state.done).filter((k) => /^[1-9]\d*$/.test(k)).length,
   markDone(n) {
     state.done[n] = { at: new Date().toISOString() };
     save(state);

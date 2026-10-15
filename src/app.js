@@ -1,4 +1,4 @@
-import { CHESTS, TASKS, PROLOGUE, START_DATE, TYPE_LABEL } from './missions.js';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js';
 import { CODE_HASHES } from './codes.js';
 import { hashCode } from './hash.js';
 import { store, savePhoto, getPhoto, resizeImage } from './store.js';
@@ -39,12 +39,14 @@ const formatDate = (iso) =>
 /* ---------- Estado de pruebas y cofres ---------- */
 function taskState(n) {
   if (store.isDone(n)) return 'done';
-  if (n === 0) return 'available';
+  if (isPractice(n)) return 'available';
   if (DEV) return 'available';
   if (n > 1 && !store.isDone(n - 1)) return 'locked';
   if (todayISO() < taskDate(n)) return 'waitDate';
   return 'available';
 }
+const practiceOf = (id) => PRACTICE.find((p) => String(p.n) === String(id));
+const isPractice = (id) => Boolean(practiceOf(id));
 const isStandalone = () => window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 const chestOf = (id) => CHESTS.find((c) => c.id === id);
 const chestTasks = (c) => TASKS.filter((t) => t.chestId === c.id);
@@ -103,14 +105,15 @@ function intro() {
 
 function todayCards() {
   const cards = [];
-  if (!store.isDone(0) && (DEV || todayISO() < START_DATE)) {
+  const pendingPractice = PRACTICE.find((p) => !store.isDone(p.n));
+  if (pendingPractice && (DEV || todayISO() < START_DATE)) {
     cards.push(
       h(
         'a',
-        { class: 'today', href: '#/task/0' },
-        h('p', { class: 'eyebrow' }, 'Prueba 0 · Práctica'),
-        h('strong', {}, PROLOGUE.title.replace('Prueba 0: ', '')),
-        h('small', {}, 'Un adelanto de lo que viene. No cuenta dentro de las treinta pruebas.'),
+        { class: 'today', href: `#/task/${pendingPractice.n}` },
+        h('p', { class: 'eyebrow' }, pendingPractice.label),
+        h('strong', {}, pendingPractice.title.replace('Prueba 0: ', '')),
+        h('small', {}, pendingPractice.blurb),
       ),
     );
   }
@@ -391,12 +394,12 @@ function chestView(id) {
 }
 
 function taskDone(t) {
-  if (t.n === 0) {
+  if (isPractice(t.n)) {
     const node = overlay(
-      h('p', { class: 'eyebrow' }, 'Prueba de práctica completada'),
+      h('p', { class: 'eyebrow' }, 'Práctica completada'),
       h('div', { class: 'medal-wrap', html: medalSVG('00') }),
-      h('h2', {}, '¡Lista para empezar!'),
-      h('p', { class: 'lead' }, `El reino te espera el ${formatDate(START_DATE)}. Tu primera prueba se abrirá ese día.`),
+      h('h2', {}, t.doneTitle),
+      h('p', { class: 'lead' }, t.doneNote),
       h(
         'button',
         {
@@ -489,7 +492,7 @@ function physicalPanel(t) {
 }
 
 async function taskView(n) {
-  const t = n === 0 ? PROLOGUE : TASKS.find((x) => x.n === n);
+  const t = practiceOf(n) ?? TASKS.find((x) => x.n === n);
   const state = t ? taskState(n) : 'locked';
   if (!t || (state !== 'available' && state !== 'done')) {
     location.hash = '#/';
@@ -518,12 +521,12 @@ async function taskView(n) {
       h(
         'header',
         { class: 'mission-head' },
-        n === 0
+        isPractice(n)
           ? h('a', { class: 'back', href: '#/' }, '← Misiones')
           : h('a', { class: 'back', href: `#/chest/${t.chestId}` }, `← Misión ${pad(t.chestId)}`),
-        h('p', { class: 'eyebrow' }, n === 0 ? `Práctica · ${TYPE_LABEL[t.type]}` : `Prueba ${t.idx + 1} de 3 · ${TYPE_LABEL[t.type]}`),
+        h('p', { class: 'eyebrow' }, isPractice(n) ? `Práctica · ${TYPE_LABEL[t.type]}` : `Prueba ${t.idx + 1} de 3 · ${TYPE_LABEL[t.type]}`),
         h('h2', {}, t.title),
-        h('small', {}, n === 0 ? 'Disponible ahora' : formatDate(taskDate(n))),
+        h('small', {}, isPractice(n) ? 'Disponible ahora' : formatDate(taskDate(n))),
       ),
       h('p', { class: 'story' }, t.story),
       h(
@@ -579,8 +582,8 @@ function render() {
   setScene('home');
   if (!store.introSeen() && !DEV) return intro();
   const hash = location.hash || '#/';
-  let match = hash.match(/^#\/task\/(\d+)$/);
-  if (match) return void taskView(Number(match[1]));
+  let match = hash.match(/^#\/task\/(\w+)$/);
+  if (match) return void taskView(/^\d+$/.test(match[1]) ? Number(match[1]) : match[1]);
   match = hash.match(/^#\/chest\/(\d+)$/);
   if (match) return void chestView(Number(match[1]));
   if (hash === '#/chronicle') return void chronicle();

@@ -1080,6 +1080,341 @@ function slide(root, puzzle, onSolved) {
   root.append(el('p', 'q-text', puzzle.prompt ?? 'Desliza las piezas hasta armar la imagen. Toca una pieza al lado del espacio vacío.'), preview, info, board);
 }
 
+/* ---------- Torre de Hanoi ---------- */
+function hanoi(root, puzzle, onSolved) {
+  const n = puzzle.discs ?? 5;
+  const pegs = [Array.from({ length: n }, (_, i) => n - i), [], []];
+  let selected = null;
+  let moves = 0;
+  let finished = false;
+  const info = el('p', 'diff-count');
+  const msg = el('p', 'feedback');
+  const board = el('div', 'hn-board');
+
+  const render = () => {
+    info.textContent = `Movimientos: ${moves} · Mínimo posible: ${2 ** n - 1}`;
+    board.replaceChildren(
+      ...pegs.map((stack, i) => {
+        const peg = el('button', `hn-peg${selected === i ? ' sel' : ''}`);
+        peg.type = 'button';
+        stack.forEach((d) => {
+          const disc = el('span', 'hn-disc');
+          disc.style.width = `${24 + (d / n) * 70}%`;
+          disc.style.setProperty('--hue', String(150 + d * 18));
+          peg.append(disc);
+        });
+        peg.addEventListener('click', () => tap(i));
+        return peg;
+      }),
+    );
+  };
+
+  const tap = (i) => {
+    if (finished) return;
+    msg.textContent = '';
+    if (selected === null) {
+      if (pegs[i].length) selected = i;
+    } else if (selected === i) {
+      selected = null;
+    } else {
+      const from = pegs[selected];
+      const to = pegs[i];
+      const disc = from[from.length - 1];
+      if (to.length && to[to.length - 1] < disc) {
+        msg.textContent = 'Un disco grande no puede ir sobre uno más pequeño.';
+        msg.className = 'feedback bad';
+        selected = null;
+      } else {
+        to.push(from.pop());
+        moves += 1;
+        selected = null;
+        if (pegs[2].length === n) {
+          finished = true;
+          msg.textContent = '¡Torre completa!';
+          msg.className = 'feedback good';
+          render();
+          onSolved();
+          return;
+        }
+      }
+    }
+    render();
+  };
+
+  root.append(
+    el('p', 'q-text', puzzle.prompt ?? `Mueve toda la torre de ${n} discos a la tercera columna. Solo puedes mover un disco a la vez y nunca uno grande sobre uno más pequeño.`),
+    info,
+    board,
+    msg,
+  );
+  render();
+}
+
+/* ---------- Lights Out ---------- */
+function lightsout(root, puzzle, onSolved) {
+  const n = puzzle.size ?? 5;
+  const rand = mulberry32(puzzle.seed ?? 4);
+  const grid = Array.from({ length: n }, () => Array(n).fill(false));
+  const toggle = (r, c) => {
+    for (const [dr, dc] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const rr = r + dr;
+      const cc = c + dc;
+      if (rr >= 0 && rr < n && cc >= 0 && cc < n) grid[rr][cc] = !grid[rr][cc];
+    }
+  };
+  for (let k = 0; k < (puzzle.scramble ?? 14); k++) toggle(Math.floor(rand() * n), Math.floor(rand() * n));
+  if (grid.flat().every((v) => !v)) toggle(1, 1);
+  let moves = 0;
+  let finished = false;
+  const info = el('p', 'diff-count', 'Movimientos: 0');
+  const board = el('div', 'lo-grid');
+  board.style.setProperty('--n', n);
+  const cells = grid.map((row, r) =>
+    row.map((_, c) => {
+      const cell = el('button', 'lo-cell');
+      cell.type = 'button';
+      cell.addEventListener('click', () => {
+        if (finished) return;
+        toggle(r, c);
+        moves += 1;
+        info.textContent = `Movimientos: ${moves}`;
+        paint();
+        if (grid.flat().every((v) => !v)) {
+          finished = true;
+          onSolved();
+        }
+      });
+      board.append(cell);
+      return cell;
+    }),
+  );
+  const paint = () => cells.forEach((row, r) => row.forEach((cell, c) => cell.classList.toggle('on', grid[r][c])));
+  root.append(
+    el('p', 'q-text', puzzle.prompt ?? 'Apaga todas las luces. Al tocar una casilla se cambian ella y sus cuatro vecinas (arriba, abajo, izquierda y derecha).'),
+    info,
+    board,
+  );
+  paint();
+}
+
+/* ---------- Adivina la palabra ---------- */
+function wordle(root, puzzle, onSolved) {
+  const answers = puzzle.words.map((w) => strip(w).toUpperCase());
+  const LEN = 5;
+  const TRIES = 6;
+  let wordIndex = 0;
+  let row = 0;
+  let current = '';
+  let finished = false;
+  const status = el('p', 'feedback');
+  const progress = el('p', 'diff-count');
+  const board = el('div', 'wd-board');
+  const keyboard = el('div', 'wd-keys');
+  const keyState = new Map();
+  const rank = { absent: 1, present: 2, correct: 3 };
+
+  const evaluate = (guess, answer) => {
+    const result = Array(LEN).fill('absent');
+    const left = answer.split('');
+    for (let i = 0; i < LEN; i++) {
+      if (guess[i] === answer[i]) {
+        result[i] = 'correct';
+        left[i] = null;
+      }
+    }
+    for (let i = 0; i < LEN; i++) {
+      if (result[i] === 'correct') continue;
+      const at = left.indexOf(guess[i]);
+      if (at >= 0) {
+        result[i] = 'present';
+        left[at] = null;
+      }
+    }
+    return result;
+  };
+
+  const rows = Array.from({ length: TRIES }, () => {
+    const r = el('div', 'wd-row');
+    const cells = Array.from({ length: LEN }, () => el('span', 'wd-cell'));
+    r.append(...cells);
+    board.append(r);
+    return cells;
+  });
+
+  const paintRow = () => {
+    rows[row].forEach((cell, i) => (cell.textContent = current[i] ?? ''));
+  };
+
+  const resetBoard = () => {
+    row = 0;
+    current = '';
+    keyState.clear();
+    rows.flat().forEach((cell) => {
+      cell.textContent = '';
+      cell.className = 'wd-cell';
+    });
+    keyboard.querySelectorAll('.wd-key').forEach((k) => k.classList.remove('correct', 'present', 'absent'));
+    progress.textContent = `Palabra ${wordIndex + 1} de ${answers.length}`;
+  };
+
+  const submit = () => {
+    if (finished) return;
+    if (current.length < LEN) {
+      status.textContent = 'Faltan letras.';
+      status.className = 'feedback bad';
+      return;
+    }
+    const answer = answers[wordIndex];
+    const result = evaluate(current, answer);
+    result.forEach((state, i) => {
+      rows[row][i].classList.add(state);
+      const letter = current[i];
+      if (!keyState.has(letter) || rank[state] > rank[keyState.get(letter)]) keyState.set(letter, state);
+    });
+    keyboard.querySelectorAll('.wd-key').forEach((k) => {
+      const st = keyState.get(k.dataset.k);
+      if (st) {
+        k.classList.remove('correct', 'present', 'absent');
+        k.classList.add(st);
+      }
+    });
+    if (current === answer) {
+      status.textContent = '¡Correcto!';
+      status.className = 'feedback good';
+      wordIndex += 1;
+      if (wordIndex === answers.length) {
+        finished = true;
+        onSolved();
+        return;
+      }
+      setTimeout(() => {
+        status.textContent = '';
+        resetBoard();
+      }, 900);
+      return;
+    }
+    row += 1;
+    current = '';
+    if (row === TRIES) {
+      status.textContent = 'Se acabaron los intentos. Empieza otra vez con la misma palabra.';
+      status.className = 'feedback bad';
+      setTimeout(resetBoard, 1300);
+    } else {
+      status.textContent = '';
+    }
+  };
+
+  const press = (k) => {
+    if (finished || row >= TRIES) return;
+    if (k === 'ENTER') return submit();
+    if (k === 'BACK') current = current.slice(0, -1);
+    else if (/^[A-Z]$/.test(k) && current.length < LEN) current += k;
+    paintRow();
+  };
+
+  for (const line of ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']) {
+    const r = el('div', 'wd-keyrow');
+    if (line.startsWith('Z')) r.append(makeKey('ENTER', 'Enter'));
+    for (const ch of line) r.append(makeKey(ch, ch));
+    if (line.startsWith('Z')) r.append(makeKey('BACK', '⌫'));
+    keyboard.append(r);
+  }
+  function makeKey(code, label) {
+    const key = el('button', `wd-key${code.length > 1 ? ' wide' : ''}`, label);
+    key.type = 'button';
+    key.dataset.k = code;
+    key.addEventListener('click', () => press(code));
+    return key;
+  }
+  const onKey = (e) => {
+    if (!root.isConnected) return document.removeEventListener('keydown', onKey);
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'Enter') press('ENTER');
+    else if (e.key === 'Backspace') press('BACK');
+    else if (/^[a-zA-Z]$/.test(e.key)) press(e.key.toUpperCase());
+  };
+  document.addEventListener('keydown', onKey);
+
+  root.append(
+    el('p', 'q-text', puzzle.prompt ?? 'Adivina la palabra secreta de 5 letras en 6 intentos. Verde: letra bien ubicada. Amarillo: está, pero en otro lugar. Gris: no está.'),
+    progress,
+    board,
+    status,
+    keyboard,
+  );
+  resetBoard();
+}
+
+/* ---------- Nonograma ---------- */
+function runsOf(line) {
+  const out = [];
+  let count = 0;
+  for (const filled of line) {
+    if (filled) count += 1;
+    else if (count) {
+      out.push(count);
+      count = 0;
+    }
+  }
+  if (count) out.push(count);
+  return out.length ? out : [0];
+}
+
+function nonogram(root, puzzle, onSolved) {
+  const solution = puzzle.art.map((r) => [...r].map((ch) => ch === 'X'));
+  const rows = solution.length;
+  const cols = solution[0].length;
+  const rowClues = solution.map(runsOf);
+  const colClues = Array.from({ length: cols }, (_, c) => runsOf(solution.map((r) => r[c])));
+  const state = solution.map((r) => r.map(() => 0));
+  let finished = false;
+
+  const grid = el('div', 'ng-grid');
+  grid.style.setProperty('--cols', cols);
+  grid.append(el('div', 'ng-corner'));
+  colClues.forEach((clue) => {
+    const box = el('div', 'ng-clue col');
+    clue.forEach((n) => box.append(el('span', '', String(n))));
+    grid.append(box);
+  });
+  const cells = [];
+  rowClues.forEach((clue, r) => {
+    const box = el('div', 'ng-clue row');
+    clue.forEach((n) => box.append(el('span', '', String(n))));
+    grid.append(box);
+    cells[r] = [];
+    for (let c = 0; c < cols; c++) {
+      const cell = el('button', 'ng-cell');
+      cell.type = 'button';
+      cell.addEventListener('click', () => {
+        if (finished) return;
+        state[r][c] = (state[r][c] + 1) % 3;
+        cell.classList.toggle('fill', state[r][c] === 1);
+        cell.classList.toggle('cross', state[r][c] === 2);
+        check();
+      });
+      cells[r][c] = cell;
+      grid.append(cell);
+    }
+  });
+
+  const same = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+  const check = () => {
+    const filled = state.map((r) => r.map((v) => v === 1));
+    const okRows = filled.every((r, i) => same(runsOf(r), rowClues[i]));
+    const okCols = colClues.every((clue, c) => same(runsOf(filled.map((r) => r[c])), clue));
+    if (okRows && okCols) {
+      finished = true;
+      onSolved();
+    }
+  };
+
+  root.append(
+    el('p', 'q-text', puzzle.prompt ?? 'Los números dicen cuántas casillas seguidas van rellenas en cada fila y columna. Toca una casilla para rellenarla, otra vez para marcarla con una cruz, y otra para borrarla. Al terminar aparece un dibujo.'),
+    grid,
+  );
+}
+
 const TYPES = {
   quiz,
   riddle,
@@ -1095,6 +1430,10 @@ const TYPES = {
   anagram,
   listenSet,
   slide,
+  hanoi,
+  lightsout,
+  wordle,
+  nonogram,
 };
 
 export function renderPuzzles(root, puzzles, onAllSolved) {
