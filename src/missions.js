@@ -53,11 +53,12 @@ const logic = (title) => {
     puzzles: [{ ...base, seed: draftCounter * 7 + 1 }],
   };
 };
-const physical = (title, objective, story = 'Ahora le toca el turno al cuerpo.') => ({
+const physical = (title, objective, story = 'Ahora le toca el turno al cuerpo.', checklist = []) => ({
   type: 'F',
   title,
   story,
   objective,
+  checklist,
 });
 
 export const CHESTS = [
@@ -68,8 +69,9 @@ export const CHESTS = [
     gift: { name: 'Calcetines de running ON' },
     tasks: [logic('El primer acertijo'), physical(
         'Calentando motores',
-        'Trote suave de 20 a 30 minutos y, al final, 4 aceleraciones cortas de unos 15 segundos. Sin cansarte: hoy solo se despiertan las piernas.',
+        'Hoy solo se despiertan las piernas: sin cansarte.',
         'La heroína sale al camino por primera vez. Hoy no se trata de ganar, sino de encender el motor.',
+        ['3 km de trote suave', '4 aceleraciones de 60 m (progresivas, sin llegar al máximo)', '10 sentadillas con tu peso corporal'],
       ), logic('El segundo acertijo')],
   },
   {
@@ -79,8 +81,9 @@ export const CHESTS = [
     gift: { name: 'Zapatillas Cloudswift 3 ON' },
     tasks: [logic('Lógica 2A'), physical(
         'Prueba de Fuerza',
-        'Sesión de fuerza de cuerpo completo en la Speediance, de 30 a 40 minutos, con una carga exigente y buena técnica.',
+        'En la Speediance, 3 rondas de este circuito, con 90 segundos de descanso entre rondas y buena técnica.',
         'El Guardián de Hierro custodia la puerta. Solo quien levanta su propio límite puede cruzarla.',
+        ['10 hip thrust con 70 kg', '10 press de banca con 25 kg', '10 peso muerto con 50 kg', '10 remo sentada con 20 kg', 'Plancha de 45 segundos'],
       ), logic('Lógica 2B')],
   },
   {
@@ -90,8 +93,9 @@ export const CHESTS = [
     gift: GIFT_PENDING,
     tasks: [logic('Lógica 3A'), physical(
         'El Ritmo de Jade',
-        '10 minutos de trote suave, 20 minutos sostenidos a un ritmo cómodamente duro (puedes hablar, pero con dificultad) y 10 minutos de vuelta a la calma.',
+        'Un esfuerzo continuo y parejo: se cuenta el tiempo del reloj.',
         'Los sabios enseñan que el verdadero ritmo no es el más rápido, sino el que puedes sostener.',
+        ['10 minutos de trote suave de calentamiento', '5 km en 27 minutos o menos', '5 minutos de trote suave para volver a la calma'],
       ), logic('Lógica 3B')],
   },
   {
@@ -101,8 +105,9 @@ export const CHESTS = [
     gift: GIFT_PENDING,
     tasks: [logic('Lógica 4A'), physical(
         'Velocista Renacida',
-        'Calienta 10 minutos y haz de 6 a 8 sprints de 100 metros al 90%, caminando de vuelta para recuperarte por completo. Cierra con 5 minutos de trote suave.',
+        'Sprints al 90%, volviendo caminando para recuperarte por completo entre cada uno.',
         'La pista antigua vuelve a encenderse. Los espíritus de las velocistas esperan a que Piyi recuerde cómo vuela.',
+        ['10 minutos de trote y movilidad de calentamiento', '3 salidas de 30 m, como en una largada', '6 sprints de 100 m', '5 minutos de trote suave para volver a la calma'],
       ), logic('Lógica 4B')],
   },
   {
@@ -112,8 +117,9 @@ export const CHESTS = [
     gift: { name: 'Zapatillas Cloud 6 ON' },
     tasks: [logic('Escucha y descifra'), physical(
         'La Ruta de los Faroles',
-        'Tu salida larga de la semana, a ritmo conversacional. La distancia o el tiempo los define tu plan de entrenamiento.',
+        'Tu salida larga de la semana, a ritmo conversacional: tienes que poder hablar mientras corres.',
         'Un camino de farolillos rojos se pierde en el horizonte. Hoy se recorre sin prisa, pero sin parar.',
+        ['12 km a ritmo suave, sin mirar el reloj más de lo necesario'],
       ), logic('Lógica 5B')],
   },
   {
@@ -123,8 +129,9 @@ export const CHESTS = [
     gift: GIFT_PENDING,
     tasks: [logic('Lógica 6A'), physical(
         'Fuerza de Piernas',
-        'Sesión en la Speediance enfocada en piernas y core, de 30 a 40 minutos. Es la última sesión pesada antes de la carrera.',
+        'La última sesión pesada antes de la carrera. En la Speediance, 3 rondas con 90 segundos de descanso entre rondas.',
         'El Guardián de Hierro vuelve a la puerta. Esta vez las piernas son su armadura.',
+        ['10 sentadillas con 30 kg', '10 hip thrust con 70 kg', '12 zancadas, 6 por pierna, con 10 kg', '10 peso muerto rumano con 40 kg', 'Plancha lateral de 30 segundos por lado'],
       ), logic('Lógica 6B')],
   },
   {
@@ -134,8 +141,9 @@ export const CHESTS = [
     gift: GIFT_PENDING,
     tasks: [logic('Lógica 7A'), physical(
         'Ensayo General',
-        '10 minutos de calentamiento, 3 repeticiones de 1 km al ritmo objetivo de tu carrera con 2 minutos de trote entre cada una, y 5 minutos de vuelta a la calma.',
+        'Controla el ritmo: que los tres kilómetros salgan casi iguales.',
         'Falta una semana para la gran carrera. El reino ensaya contigo, kilómetro a kilómetro.',
+        ['10 minutos de trote suave de calentamiento', '3 repeticiones de 1 km a 5:30 por km, con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
       ), logic('Lógica 7B')],
   },
   {
@@ -145,8 +153,9 @@ export const CHESTS = [
     gift: GIFT_PENDING,
     tasks: [logic('Lógica 8A'), physical(
         'Afinando la Máquina',
-        'Trote suave de 20 minutos y de 4 a 6 aceleraciones relajadas de 60 a 80 metros. Que las piernas se sientan ligeras, nunca cansadas.',
+        'Que las piernas se sientan ligeras, nunca cansadas.',
         'Antes de la gran batalla, la heroína afina cuerpo y espíritu. Hoy no se fuerza: se prepara.',
+        ['4 km de trote suave', '6 aceleraciones relajadas de 80 m, caminando de vuelta'],
       ), logic('Lógica 8B')],
   },
   {
@@ -156,8 +165,9 @@ export const CHESTS = [
     gift: { name: 'Polera Train-T Running ON' },
     tasks: [logic('Lógica 9A'), physical(
         'El Ritual de la Víspera',
-        '15 minutos de trote muy suave, 10 minutos de movilidad y, si te sientes bien, 3 aceleraciones cortas. Descansa y prepara tu equipo para mañana.',
+        'Hoy se descansa casi todo: tu misión es llegar fresca a mañana.',
         'Mañana es la gran carrera. Esta noche, el reino entero se prepara contigo.',
+        ['2 km de trote muy suave', '10 minutos de movilidad', 'Deja lista tu ropa, tu número y tu desayuno para mañana'],
       ), logic('Lógica 9B')],
   },
   {
@@ -170,6 +180,7 @@ export const CHESTS = [
         'La Gran Carrera',
         'Correr el 10K. Foto en la meta o con la medalla.',
         'Llegó el día. Diez kilómetros separan a la Velocista de Jade de la gloria, y el reino entero la espera en la meta.',
+        ['10 km de carrera', 'Foto en la meta o con tu medalla'],
       ),
       logic('El descanso del héroe'),
       logic('El Jefe Final'),

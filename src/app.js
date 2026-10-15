@@ -463,7 +463,12 @@ async function taskView(n) {
         h('small', {}, formatDate(taskDate(n))),
       ),
       h('p', { class: 'story' }, t.story),
-      h('p', { class: 'objective' }, h('strong', {}, 'Objetivo  '), t.objective),
+      h(
+        'div',
+        { class: 'objective' },
+        h('p', {}, h('strong', {}, 'Objetivo  '), t.objective),
+        t.checklist?.length ? h('ul', { class: 'checklist' }, t.checklist.map((item) => h('li', {}, item))) : null,
+      ),
       body,
     ),
   );
