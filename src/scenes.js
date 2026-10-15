@@ -20,6 +20,7 @@ export const SCENES = {
       { id: 'bamboo', svg: '<rect x="14" y="60" width="6" height="90" fill="#5fa86b"/><rect x="26" y="75" width="6" height="75" fill="#6fba7b"/><rect x="2" y="90" width="6" height="60" fill="#5fa86b"/>' },
       { id: 'steamer1', svg: '<ellipse cx="90" cy="168" rx="38" ry="14" fill="#c99a5b"/><rect x="52" y="146" width="76" height="22" fill="#d8aa6a"/><ellipse cx="90" cy="146" rx="38" ry="10" fill="#e5bd7f"/>' },
       { id: 'steamer2', svg: '<ellipse cx="165" cy="168" rx="38" ry="14" fill="#c99a5b"/><rect x="127" y="146" width="76" height="22" fill="#d8aa6a"/><ellipse cx="165" cy="146" rx="38" ry="10" fill="#e5bd7f"/>' },
+      { id: 'steam', svg: '<path d="M90 140 q-6 -14 0 -24 q6 -10 0 -22" stroke="#fff" stroke-opacity=".55" stroke-width="3" fill="none" stroke-linecap="round"/>' },
       {
         id: 'bowl',
         svg: '<ellipse cx="240" cy="182" rx="30" ry="12" fill="#eee6d6"/><path d="M210 182 Q240 210 270 182Z" fill="#eee6d6"/><circle cx="232" cy="178" r="5" fill="#d8334a"/><circle cx="246" cy="180" r="5" fill="#d8334a"/>',
@@ -47,6 +48,10 @@ export const SCENES = {
         hit: [60, 199, 22],
       },
       { add: '<ellipse cx="135" cy="228" rx="14" ry="6" fill="#eee6d6"/>', hit: [135, 228, 18] },
+      { id: 'steam', alt: '', hit: [90, 116, 16] },
+      { id: 'win', alt: '<rect x="120" y="22" width="80" height="70" rx="6" fill="#1b2a44" stroke="#d8334a" stroke-width="3"/>', hit: [122, 40, 12] },
+      { id: 'lanternL', alt: '<line x1="40" y1="0" x2="40" y2="28" stroke="#c9a24a" stroke-width="2"/><rect x="34" y="26" width="12" height="4" fill="#c9a24a"/><ellipse cx="40" cy="50" rx="18" ry="22" fill="#d8334a"/>', hit: [40, 80, 12] },
+      { id: 'steamer1', alt: '<ellipse cx="90" cy="168" rx="38" ry="14" fill="#c99a5b"/><rect x="52" y="146" width="76" height="22" fill="#d8aa6a"/><ellipse cx="90" cy="146" rx="38" ry="10" fill="#d8334a"/>', hit: [90, 152, 18] },
     ],
   },
 
@@ -70,6 +75,8 @@ export const SCENES = {
         id: 'runner',
         svg: '<circle cx="150" cy="172" r="6" fill="#f1c7a3"/><rect x="144" y="178" width="12" height="18" rx="4" fill="#3de8ac"/><line x1="147" y1="196" x2="140" y2="212" stroke="#222" stroke-width="4" stroke-linecap="round"/><line x1="153" y1="196" x2="164" y2="208" stroke="#222" stroke-width="4" stroke-linecap="round"/>',
       },
+      { id: 'ball', svg: '<circle cx="210" cy="206" r="8" fill="#fff" stroke="#333" stroke-width="1.5"/><path d="M205 202 l5 -3 l5 3 l-2 6 h-6z" fill="#333"/>' },
+      { id: 'cone', svg: '<path d="M70 232 l8 -22 l8 22z" fill="#ff8a3c"/>' },
     ],
     diffs: [
       { id: 'sun', alt: '<circle cx="160" cy="112" r="36" fill="#ffe2a1"/>', hit: [160, 112, 34] },
@@ -80,7 +87,7 @@ export const SCENES = {
       {
         id: 'track',
         alt: '<rect y="162" width="320" height="78" fill="#b8402f"/><line x1="0" y1="186" x2="320" y2="186" stroke="#fff" stroke-width="2"/><line x1="0" y1="233" x2="320" y2="233" stroke="#fff" stroke-width="2"/>',
-        hit: [90, 210, 16],
+        hit: [260, 210, 16],
       },
       {
         id: 'runner',
@@ -88,6 +95,10 @@ export const SCENES = {
         hit: [150, 186, 16],
       },
       { add: '<path d="M108 62 q6 -8 12 0 q6 -8 12 0" stroke="#222" fill="none" stroke-width="2"/>', hit: [120, 60, 16] },
+      { id: 'poleL', alt: '<rect x="22" y="70" width="6" height="92" fill="#555"/><rect x="12" y="62" width="26" height="10" fill="#f2c14e"/>', hit: [25, 66, 14] },
+      { id: 'cloud2', alt: '<ellipse cx="250" cy="52" rx="28" ry="10" fill="#fff" opacity=".85"/>', hit: [236, 46, 14] },
+      { id: 'ball', alt: '', hit: [210, 206, 13] },
+      { id: 'cone', alt: '<path d="M70 232 l8 -22 l8 22z" fill="#3da0ff"/>', hit: [78, 222, 12] },
     ],
   },
 };

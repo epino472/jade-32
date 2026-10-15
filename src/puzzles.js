@@ -279,56 +279,70 @@ function flags(root, puzzle, onSolved) {
   quiz(root, { questions }, onSolved);
 }
 
-const SUDOKU_N = 6;
-const SUDOKU_BOX_ROWS = 2;
-const SUDOKU_BOX_COLS = 3;
+const SUDOKU_CONFIGS = {
+  6: { n: 6, br: 2, bc: 3 },
+  9: { n: 9, br: 3, bc: 3 },
+};
 
-function sudokuFits(grid, r, c, v) {
-  for (let i = 0; i < SUDOKU_N; i++) if (grid[r][i] === v || grid[i][c] === v) return false;
-  const br = r - (r % SUDOKU_BOX_ROWS);
-  const bc = c - (c % SUDOKU_BOX_COLS);
-  for (let i = 0; i < SUDOKU_BOX_ROWS; i++)
-    for (let j = 0; j < SUDOKU_BOX_COLS; j++) if (grid[br + i][bc + j] === v) return false;
-  return true;
+function sudokuCandidates(grid, r, c, cfg) {
+  const used = new Set();
+  for (let i = 0; i < cfg.n; i++) {
+    used.add(grid[r][i]);
+    used.add(grid[i][c]);
+  }
+  const br = r - (r % cfg.br);
+  const bc = c - (c % cfg.bc);
+  for (let i = 0; i < cfg.br; i++) for (let j = 0; j < cfg.bc; j++) used.add(grid[br + i][bc + j]);
+  const out = [];
+  for (let v = 1; v <= cfg.n; v++) if (!used.has(v)) out.push(v);
+  return out;
 }
 
-function countSudokuSolutions(grid, limit = 2) {
+function countSudokuSolutions(grid, cfg, limit = 2) {
   let found = 0;
-  const solve = (pos) => {
+  const solve = () => {
     if (found >= limit) return;
-    if (pos === SUDOKU_N * SUDOKU_N) {
+    let best = null;
+    let bestCands = null;
+    search: for (let r = 0; r < cfg.n; r++) {
+      for (let c = 0; c < cfg.n; c++) {
+        if (grid[r][c]) continue;
+        const cands = sudokuCandidates(grid, r, c, cfg);
+        if (!bestCands || cands.length < bestCands.length) {
+          best = [r, c];
+          bestCands = cands;
+          if (cands.length <= 1) break search;
+        }
+      }
+    }
+    if (!best) {
       found += 1;
       return;
     }
-    const r = Math.floor(pos / SUDOKU_N);
-    const c = pos % SUDOKU_N;
-    if (grid[r][c]) return solve(pos + 1);
-    for (let v = 1; v <= SUDOKU_N && found < limit; v++) {
-      if (sudokuFits(grid, r, c, v)) {
-        grid[r][c] = v;
-        solve(pos + 1);
-        grid[r][c] = 0;
-      }
+    for (const v of bestCands) {
+      grid[best[0]][best[1]] = v;
+      solve();
+      grid[best[0]][best[1]] = 0;
+      if (found >= limit) return;
     }
   };
-  solve(0);
+  solve();
   return found;
 }
 
-function makeSudoku(seed, blanks) {
+function makeSudoku(seed, blanks, cfg) {
   const rand = mulberry32(seed);
-  const solution = Array.from({ length: SUDOKU_N }, () => Array(SUDOKU_N).fill(0));
-  const digits = [1, 2, 3, 4, 5, 6];
+  const solution = Array.from({ length: cfg.n }, () => Array(cfg.n).fill(0));
+  const digits = Array.from({ length: cfg.n }, (_, i) => i + 1);
   const fill = (pos) => {
-    if (pos === SUDOKU_N * SUDOKU_N) return true;
-    const r = Math.floor(pos / SUDOKU_N);
-    const c = pos % SUDOKU_N;
-    for (const v of seededShuffle(digits, rand)) {
-      if (sudokuFits(solution, r, c, v)) {
-        solution[r][c] = v;
-        if (fill(pos + 1)) return true;
-        solution[r][c] = 0;
-      }
+    if (pos === cfg.n * cfg.n) return true;
+    const r = Math.floor(pos / cfg.n);
+    const c = pos % cfg.n;
+    const cands = sudokuCandidates(solution, r, c, cfg);
+    for (const v of seededShuffle(digits.filter((d) => cands.includes(d)), rand)) {
+      solution[r][c] = v;
+      if (fill(pos + 1)) return true;
+      solution[r][c] = 0;
     }
     return false;
   };
@@ -336,31 +350,33 @@ function makeSudoku(seed, blanks) {
 
   const given = solution.map((row) => [...row]);
   let removed = 0;
-  for (const idx of seededShuffle([...Array(SUDOKU_N * SUDOKU_N).keys()], rand)) {
+  for (const idx of seededShuffle([...Array(cfg.n * cfg.n).keys()], rand)) {
     if (removed >= blanks) break;
-    const r = Math.floor(idx / SUDOKU_N);
-    const c = idx % SUDOKU_N;
+    const r = Math.floor(idx / cfg.n);
+    const c = idx % cfg.n;
     const keep = given[r][c];
     given[r][c] = 0;
-    if (countSudokuSolutions(given.map((row) => [...row])) === 1) removed += 1;
+    if (countSudokuSolutions(given.map((row) => [...row]), cfg) === 1) removed += 1;
     else given[r][c] = keep;
   }
   return { given, solution };
 }
 
 function sudoku(root, puzzle, onSolved) {
-  const { given, solution } = makeSudoku(puzzle.seed ?? 3, puzzle.blanks ?? 20);
+  const cfg = SUDOKU_CONFIGS[puzzle.size ?? 6];
+  const { given, solution } = makeSudoku(puzzle.seed ?? 3, puzzle.blanks ?? 20, cfg);
   const state = given.map((row) => [...row]);
   let selected = null;
   let finished = false;
 
-  const board = el('div', 'sd-grid');
+  const board = el('div', `sd-grid n${cfg.n}`);
+  board.style.setProperty('--n', cfg.n);
   const cells = state.map((row, r) =>
     row.map((_, c) => {
       const cell = el('button', 'sd-cell');
       cell.type = 'button';
-      if (c % SUDOKU_BOX_COLS === SUDOKU_BOX_COLS - 1 && c < SUDOKU_N - 1) cell.classList.add('box-r');
-      if (r % SUDOKU_BOX_ROWS === SUDOKU_BOX_ROWS - 1 && r < SUDOKU_N - 1) cell.classList.add('box-b');
+      if (c % cfg.bc === cfg.bc - 1 && c < cfg.n - 1) cell.classList.add('box-r');
+      if (r % cfg.br === cfg.br - 1 && r < cfg.n - 1) cell.classList.add('box-b');
       if (given[r][c]) cell.classList.add('given');
       cell.addEventListener('click', () => {
         if (finished) return;
@@ -374,16 +390,15 @@ function sudoku(root, puzzle, onSolved) {
 
   const conflicts = () => {
     const bad = new Set();
-    for (let r = 0; r < SUDOKU_N; r++)
-      for (let c = 0; c < SUDOKU_N; c++) {
+    for (let r = 0; r < cfg.n; r++)
+      for (let c = 0; c < cfg.n; c++) {
         const v = state[r][c];
         if (!v) continue;
-        for (let r2 = 0; r2 < SUDOKU_N; r2++)
-          for (let c2 = 0; c2 < SUDOKU_N; c2++) {
+        for (let r2 = 0; r2 < cfg.n; r2++)
+          for (let c2 = 0; c2 < cfg.n; c2++) {
             if (r2 === r && c2 === c) continue;
             const sameBox =
-              Math.floor(r / SUDOKU_BOX_ROWS) === Math.floor(r2 / SUDOKU_BOX_ROWS) &&
-              Math.floor(c / SUDOKU_BOX_COLS) === Math.floor(c2 / SUDOKU_BOX_COLS);
+              Math.floor(r / cfg.br) === Math.floor(r2 / cfg.br) && Math.floor(c / cfg.bc) === Math.floor(c2 / cfg.bc);
             if (state[r2][c2] === v && (r2 === r || c2 === c || sameBox)) bad.add(`${r},${c}`);
           }
       }
@@ -407,7 +422,8 @@ function sudoku(root, puzzle, onSolved) {
   };
 
   const pad = el('div', 'sd-pad');
-  for (let v = 1; v <= SUDOKU_N; v++) {
+  pad.style.setProperty('--keys', cfg.n === 9 ? 5 : 7);
+  for (let v = 1; v <= cfg.n; v++) {
     const key = el('button', 'btn small', String(v));
     key.type = 'button';
     key.addEventListener('click', () => setValue(v));
@@ -424,8 +440,14 @@ function sudoku(root, puzzle, onSolved) {
     paint();
   }
 
+  const boxLabel = `${cfg.br}×${cfg.bc}`;
   root.append(
-    el('p', 'q-text', puzzle.prompt ?? 'Completa la cuadrícula: cada fila, columna y recuadro de 2×3 lleva los números del 1 al 6, sin repetir.'),
+    el(
+      'p',
+      'q-text',
+      puzzle.prompt ??
+        `Completa la cuadrícula: cada fila, columna y recuadro de ${boxLabel} lleva los números del 1 al ${cfg.n}, sin repetir.`,
+    ),
     board,
     pad,
   );
@@ -520,19 +542,32 @@ function maze(root, puzzle, onSolved) {
     player.setAttribute('cy', py);
   };
 
+  const opposite = { n: 's', s: 'n', e: 'w', w: 'e' };
+  const stepFrom = (x, y, dir) => ({ n: [x, y - 1], e: [x + 1, y], s: [x, y + 1], w: [x - 1, y] })[dir];
+  const openDirs = (x, y) => ['n', 'e', 's', 'w'].filter((d) => !grid[y][x][d]);
+
+  // Avanza por el pasillo hasta llegar a una bifurcación, un callejón sin salida o la meta.
   const move = (dir) => {
     if (finished) return;
-    const [x, y] = trail[trail.length - 1];
+    let [x, y] = trail[trail.length - 1];
     if (grid[y][x][dir]) return;
-    const next = { n: [x, y - 1], e: [x + 1, y], s: [x, y + 1], w: [x - 1, y] }[dir];
-    const back = trail[trail.length - 2];
-    if (back && back[0] === next[0] && back[1] === next[1]) trail.pop();
-    else trail.push(next);
-    draw();
-    if (next[0] === cols - 1 && next[1] === rows - 1) {
-      finished = true;
-      onSolved();
+    let current = dir;
+    for (let guard = 0; guard < 500; guard++) {
+      const next = stepFrom(x, y, current);
+      const back = trail[trail.length - 2];
+      if (back && back[0] === next[0] && back[1] === next[1]) trail.pop();
+      else trail.push(next);
+      [x, y] = next;
+      if (x === cols - 1 && y === rows - 1) {
+        finished = true;
+        break;
+      }
+      const options = openDirs(x, y).filter((d) => d !== opposite[current]);
+      if (options.length !== 1) break;
+      current = options[0];
     }
+    draw();
+    if (finished) onSolved();
   };
 
   const dpad = el('div', 'dpad');
@@ -571,7 +606,7 @@ function maze(root, puzzle, onSolved) {
   });
 
   root.append(
-    el('p', 'q-text', puzzle.prompt ?? 'Lleva la bolita de jade hasta el farol rojo. Usa las flechas o desliza el dedo.'),
+    el('p', 'q-text', puzzle.prompt ?? 'Lleva la bolita de jade hasta el farol rojo. Usa las flechas o desliza el dedo: avanzas hasta la próxima bifurcación.'),
     svg,
     dpad,
   );
@@ -868,7 +903,7 @@ function missing(root, puzzle, onSolved) {
     body.replaceChildren(go);
   };
 
-  let peeks = 2;
+  let peeks = puzzle.peeks ?? 2;
   function showGuess() {
     draw(true);
     const chosen = new Set();
