@@ -22,7 +22,7 @@ let state = load();
 
 export const store = {
   isDone: (n) => Boolean(state.done[n]),
-  doneCount: () => Object.keys(state.done).length,
+  doneCount: () => Object.keys(state.done).filter((k) => k !== '0').length,
   markDone(n) {
     state.done[n] = { at: new Date().toISOString() };
     save(state);
@@ -31,6 +31,11 @@ export const store = {
   openedCount: () => Object.keys(state.opened).length,
   markOpened(chestId) {
     state.opened[chestId] = { at: new Date().toISOString() };
+    save(state);
+  },
+  noticeHidden: () => Boolean(state.noticeHidden),
+  hideNotice() {
+    state.noticeHidden = true;
     save(state);
   },
   introSeen: () => Boolean(state.introSeen),

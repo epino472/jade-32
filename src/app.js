@@ -1,4 +1,4 @@
-import { CHESTS, TASKS, START_DATE, TYPE_LABEL } from './missions.js';
+import { CHESTS, TASKS, PROLOGUE, START_DATE, TYPE_LABEL } from './missions.js';
 import { CODE_HASHES } from './codes.js';
 import { hashCode } from './hash.js';
 import { store, savePhoto, getPhoto, resizeImage } from './store.js';
@@ -39,11 +39,13 @@ const formatDate = (iso) =>
 /* ---------- Estado de pruebas y cofres ---------- */
 function taskState(n) {
   if (store.isDone(n)) return 'done';
+  if (n === 0) return 'available';
   if (DEV) return 'available';
   if (n > 1 && !store.isDone(n - 1)) return 'locked';
   if (todayISO() < taskDate(n)) return 'waitDate';
   return 'available';
 }
+const isStandalone = () => window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
 const chestOf = (id) => CHESTS.find((c) => c.id === id);
 const chestTasks = (c) => TASKS.filter((t) => t.chestId === c.id);
 const chestDoneCount = (c) => chestTasks(c).filter((t) => store.isDone(t.n)).length;
@@ -101,6 +103,44 @@ function intro() {
 
 function todayCards() {
   const cards = [];
+  if (!store.isDone(0) && (DEV || todayISO() < START_DATE)) {
+    cards.push(
+      h(
+        'a',
+        { class: 'today', href: '#/task/0' },
+        h('p', { class: 'eyebrow' }, 'Prueba 0 · Práctica'),
+        h('strong', {}, PROLOGUE.title.replace('Prueba 0: ', '')),
+        h('small', {}, 'Un adelanto de lo que viene. No cuenta dentro de las treinta pruebas.'),
+      ),
+    );
+  }
+  if (!DEV && !isStandalone() && !store.noticeHidden()) {
+    cards.push(
+      h(
+        'div',
+        { class: 'today install' },
+        h('p', { class: 'eyebrow' }, 'Instala la app'),
+        h('strong', {}, 'Agrégala a tu pantalla de inicio'),
+        h(
+          'small',
+          {},
+          '1. En Safari, toca el botón Compartir (el cuadrado con la flecha). 2. Elige «Agregar a inicio». 3. Ábrela siempre desde ese ícono nuevo: tu progreso queda guardado ahí.',
+        ),
+        h(
+          'button',
+          {
+            class: 'btn small-btn',
+            type: 'button',
+            onclick: () => {
+              store.hideNotice();
+              render();
+            },
+          },
+          'Ya la instalé',
+        ),
+      ),
+    );
+  }
   const ready = CHESTS.find(chestReady);
   if (ready) {
     cards.push(
@@ -351,6 +391,27 @@ function chestView(id) {
 }
 
 function taskDone(t) {
+  if (t.n === 0) {
+    const node = overlay(
+      h('p', { class: 'eyebrow' }, 'Prueba de práctica completada'),
+      h('div', { class: 'medal-wrap', html: medalSVG('00') }),
+      h('h2', {}, '¡Lista para empezar!'),
+      h('p', { class: 'lead' }, `El reino te espera el ${formatDate(START_DATE)}. Tu primera prueba se abrirá ese día.`),
+      h(
+        'button',
+        {
+          class: 'btn primary block',
+          onclick: () => {
+            node.remove();
+            location.hash = '#/';
+            render();
+          },
+        },
+        'Continuar',
+      ),
+    );
+    return;
+  }
   const chest = chestOf(t.chestId);
   const ready = chestDoneCount(chest) === 3;
   const nextTask = TASKS.find((x) => x.n === t.n + 1);
@@ -428,7 +489,7 @@ function physicalPanel(t) {
 }
 
 async function taskView(n) {
-  const t = TASKS.find((x) => x.n === n);
+  const t = n === 0 ? PROLOGUE : TASKS.find((x) => x.n === n);
   const state = t ? taskState(n) : 'locked';
   if (!t || (state !== 'available' && state !== 'done')) {
     location.hash = '#/';
@@ -457,10 +518,12 @@ async function taskView(n) {
       h(
         'header',
         { class: 'mission-head' },
-        h('a', { class: 'back', href: `#/chest/${t.chestId}` }, `← Misión ${pad(t.chestId)}`),
-        h('p', { class: 'eyebrow' }, `Prueba ${t.idx + 1} de 3 · ${TYPE_LABEL[t.type]}`),
+        n === 0
+          ? h('a', { class: 'back', href: '#/' }, '← Misiones')
+          : h('a', { class: 'back', href: `#/chest/${t.chestId}` }, `← Misión ${pad(t.chestId)}`),
+        h('p', { class: 'eyebrow' }, n === 0 ? `Práctica · ${TYPE_LABEL[t.type]}` : `Prueba ${t.idx + 1} de 3 · ${TYPE_LABEL[t.type]}`),
         h('h2', {}, t.title),
-        h('small', {}, formatDate(taskDate(n))),
+        h('small', {}, n === 0 ? 'Disponible ahora' : formatDate(taskDate(n))),
       ),
       h('p', { class: 'story' }, t.story),
       h(

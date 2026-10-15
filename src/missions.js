@@ -1,4 +1,4 @@
-import { T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js';
+import { T0, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -149,6 +149,8 @@ export const CHESTS = [
     ],
   },
 ];
+
+export const PROLOGUE = { ...T0, n: 0, chestId: 0, idx: 0 };
 
 export const TASKS = CHESTS.flatMap((chest) =>
   chest.tasks.map((task, idx) => ({ ...task, n: (chest.id - 1) * 3 + idx + 1, chestId: chest.id, idx })),

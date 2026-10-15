@@ -788,6 +788,18 @@ small {
 .today.wait {
   opacity: 0.85;
 }
+.today.install {
+  border-color: var(--gold);
+}
+.today.install small {
+  line-height: 1.5;
+}
+.small-btn {
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 9px 16px;
+  font-size: 0.8rem;
+}
 .today:not(.wait):not(.ready) {
   border-left: 3px solid var(--cinnabar);
 }

@@ -397,6 +397,22 @@ const CHINO_FINAL = {
 const SLIDE_PIYI = { type: 'slide', title: 'El espejo de jade', seed: 6, size: 4, image: 'assets/piyi-square.jpg' };
 
 /* ---------- Pruebas ---------- */
+const R_RELOJ = riddle('Tengo agujas pero no pincho, tengo números pero no cuento. ¿Qué soy?', ['reloj', 'un reloj'], 'Marca la hora. Y la cuenta regresiva ya empezó.');
+const CIPHER_0 = {
+  type: 'riddle',
+  title: 'El mensaje del reino',
+  prompt: 'Un mensaje cifrado: «HO UHLQR WH HVSHUD HO GLHFLQXHYH». Cada letra está corrida 3 posiciones hacia adelante en el alfabeto. Descífralo y escríbelo completo.',
+  answers: ['el reino te espera el diecinueve'],
+  hint: 'Retrocede 3 letras: la H es en realidad una E.',
+};
+
+export const T0 = game(
+  'Prueba 0: La Llamada del Reino',
+  'Antes de que comience la aventura, el reino te envía una prueba de práctica. Es un pequeño adelanto de lo que se viene.',
+  'Resuelve el sudoku, el acertijo y descifra el mensaje. Esta prueba no cuenta dentro de las treinta.',
+  [{ type: 'sudoku', title: 'Sudoku de práctica', seed: 2, blanks: 14 }, R_RELOJ, CIPHER_0],
+);
+
 export const T1 = game(
   'La Gran Trivia',
   'Antes de entrenar el cuerpo, hay que despertar la mente. Quince preguntas custodian la primera puerta.',
