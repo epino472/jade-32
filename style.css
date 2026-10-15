@@ -834,6 +834,123 @@ small {
   line-height: 1.4;
 }
 
+/* ---------- Banderas, sudoku y laberinto ---------- */
+.q-big {
+  font-size: 4.4rem;
+  line-height: 1.1;
+  text-align: center;
+}
+.q-count {
+  text-align: center;
+}
+
+.sd-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  border: 2px solid var(--gold);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.sd-cell {
+  appearance: none;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ivory);
+  font-family: var(--serif);
+  font-size: 1.5rem;
+}
+.sd-cell.box-r {
+  border-right: 2px solid var(--gold);
+}
+.sd-cell.box-b {
+  border-bottom: 2px solid var(--gold);
+}
+.sd-cell.given {
+  color: var(--gold);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+}
+.sd-cell.sel {
+  background: rgba(95, 227, 180, 0.28);
+}
+.sd-cell.bad {
+  color: #f08a80;
+}
+.sd-pad {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  max-width: 360px;
+  margin: 0 auto;
+  width: 100%;
+}
+.btn.small {
+  padding: 12px 0;
+  letter-spacing: 0;
+  font-size: 1.1rem;
+}
+
+.maze-svg {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  display: block;
+  touch-action: none;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.maze-wall {
+  stroke: var(--gold);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+}
+.maze-trail {
+  fill: none;
+  stroke: rgba(95, 227, 180, 0.55);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.maze-player {
+  fill: var(--jade);
+  stroke: #eafff6;
+  stroke-width: 1.5;
+}
+.maze-goal {
+  fill: var(--cinnabar);
+  stroke: var(--gold);
+  stroke-width: 1.5;
+}
+.dpad {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  grid-template-rows: repeat(2, 56px);
+  gap: 6px;
+  justify-content: center;
+}
+.dpad .dp-n {
+  grid-column: 2;
+  grid-row: 1;
+}
+.dpad .dp-w {
+  grid-column: 1;
+  grid-row: 2;
+}
+.dpad .dp-s {
+  grid-column: 2;
+  grid-row: 2;
+}
+.dpad .dp-e {
+  grid-column: 3;
+  grid-row: 2;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;
