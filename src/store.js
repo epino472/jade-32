@@ -1,6 +1,6 @@
 const KEY = 'piyiquest.v2';
 const DB_NAME = 'piyiquest-photos';
-const EMPTY = () => ({ done: {}, opened: {} });
+const EMPTY = () => ({ done: {}, opened: {}, stage: {} });
 
 function load() {
   try {
@@ -25,6 +25,11 @@ export const store = {
   doneCount: () => Object.keys(state.done).filter((k) => /^[1-9]\d*$/.test(k)).length,
   markDone(n) {
     state.done[n] = { at: new Date().toISOString() };
+    save(state);
+  },
+  stageOf: (n) => state.stage?.[n] ?? 0,
+  setStage(n, index) {
+    state.stage = { ...state.stage, [n]: index };
     save(state);
   },
   isOpened: (chestId) => Boolean(state.opened[chestId]),

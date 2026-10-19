@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261018b';
+import { SCENES } from './scenes.js?v=20261018c';
 
 const strip = (s) =>
   s
@@ -1775,9 +1775,9 @@ const HINTERS = {
 /* ---------- Etapas de juego con Pista y Reiniciar ---------- */
 const MAX_HINTS = 2;
 
-export function renderPuzzles(root, puzzles, onAllSolved) {
+export function renderPuzzles(root, puzzles, onAllSolved, { start = 0, onProgress } = {}) {
   root.replaceChildren();
-  let index = 0;
+  let index = Math.min(Math.max(start, 0), puzzles.length - 1);
 
   const showStage = () => {
     root.replaceChildren();
@@ -1807,8 +1807,10 @@ export function renderPuzzles(root, puzzles, onAllSolved) {
       const next = el('button', 'btn primary', index + 1 < puzzles.length ? 'Siguiente prueba →' : 'Completar pruebas ✓');
       next.addEventListener('click', () => {
         index += 1;
-        if (index < puzzles.length) showStage();
-        else onAllSolved();
+        if (index < puzzles.length) {
+          onProgress?.(index);
+          showStage();
+        } else onAllSolved();
       });
       root.append(next);
     };

@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261018b';
-import { CODE_HASHES } from './codes.js?v=20261018b';
-import { hashCode } from './hash.js?v=20261018b';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261018b';
-import { portrait, medalSVG } from './emblem.js?v=20261018b';
-import { renderPuzzles } from './puzzles.js?v=20261018b';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261018c';
+import { CODE_HASHES } from './codes.js?v=20261018c';
+import { hashCode } from './hash.js?v=20261018c';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261018c';
+import { portrait, medalSVG } from './emblem.js?v=20261018c';
+import { renderPuzzles } from './puzzles.js?v=20261018c';
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
@@ -506,10 +506,15 @@ async function taskView(n) {
   } else if (t.puzzles?.length) {
     const stage = h('div', { class: 'stage' });
     body.append(stage);
-    renderPuzzles(stage, t.puzzles, () => {
-      stage.replaceChildren(h('p', { class: 'feedback good' }, 'Prueba superada ✓'));
-      completeTask(t, null);
-    });
+    renderPuzzles(
+      stage,
+      t.puzzles,
+      () => {
+        stage.replaceChildren(h('p', { class: 'feedback good' }, 'Prueba superada ✓'));
+        completeTask(t, null);
+      },
+      { start: store.stageOf(n), onProgress: (i) => store.setStage(n, i) },
+    );
   } else {
     body.append(physicalPanel(t));
   }
