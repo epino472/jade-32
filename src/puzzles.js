@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261018c';
+import { SCENES } from './scenes.js?v=20261018e';
 
 const strip = (s) =>
   s
@@ -1718,10 +1718,15 @@ const HINTERS = {
     }
     if (!solution) return refund('No encuentro una solución desde aquí. Usa «Reiniciar».');
     if (!solution.length) return refund('Ya están todas apagadas.');
-    solution.slice(0, level === 1 ? 1 : 3).forEach(([r, c]) => cells[r * n + c].classList.add('hint'));
+    const marked = level === 1 ? solution.slice(0, 1) : solution;
+    marked.forEach(([r, c]) => {
+      const cell = cells[r * n + c];
+      cell.classList.add('hint');
+      cell.addEventListener('click', () => cell.classList.remove('hint'), { once: true });
+    });
     return level === 1
-      ? 'Toca la casilla resaltada: es parte de la solución.'
-      : 'Las casillas resaltadas son parte de la solución (el orden no importa).';
+      ? 'Truco: apaga las luces fila por fila, de arriba hacia abajo. Si una luz de una fila sigue encendida, toca la casilla que está justo debajo de ella. Ahora toca la casilla resaltada: es parte de la solución.'
+      : `Resalté las ${marked.length} casillas que tienes que tocar, una vez cada una (el orden no importa). El resaltado desaparece al tocar cada una.`;
   },
 
   wordle: (root, p, level) => {

@@ -588,7 +588,7 @@ export const P2 = game(
   'Resuelve los cuatro juegos nuevos. Esta práctica no cuenta dentro de las treinta pruebas.',
   [
     { type: 'hanoi', title: 'La Torre de Hanoi', discs: 5 },
-    { type: 'lightsout', title: 'Apaga las luces', size: 5, seed: 4 },
+    { type: 'lightsout', title: 'Apaga las luces', size: 5, seed: 4, scramble: 8 },
     { type: 'wordle', title: 'Adivina la palabra', words: ['TIGRE', 'RITMO', 'FAROL'] },
     {
       type: 'nonogram',
