@@ -1339,6 +1339,64 @@ small {
   content: '×';
 }
 
+/* ---------- Pistas y reinicio ---------- */
+.stage-tools {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stage-tools .small-btn {
+  margin-top: 0;
+}
+.hint-btn {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.hint-btn:disabled {
+  opacity: 0.45;
+}
+.hint-msg {
+  margin: 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--gold);
+  border-radius: 8px;
+  background: rgba(217, 189, 126, 0.12);
+  line-height: 1.45;
+}
+.opt.dim {
+  opacity: 0.28;
+  text-decoration: line-through;
+}
+.ws-cell.hint,
+.sd-cell.hint,
+.lo-cell.hint,
+.slide-tile.hint {
+  outline: 3px solid var(--gold);
+  outline-offset: -2px;
+}
+.hn-peg.hint {
+  border-color: var(--gold);
+  background: rgba(217, 189, 126, 0.18);
+}
+.chip.hintchip {
+  outline: 3px solid var(--gold);
+  background: rgba(217, 189, 126, 0.2);
+}
+.maze-hint {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  stroke-dasharray: 7 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.diff-hint {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 3;
+  stroke-dasharray: 5 4;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation: none !important;

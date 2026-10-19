@@ -1101,6 +1101,7 @@ function hanoi(root, puzzle, onSolved) {
           const disc = el('span', 'hn-disc');
           disc.style.width = `${24 + (d / n) * 70}%`;
           disc.style.setProperty('--hue', String(150 + d * 18));
+          disc.dataset.d = String(d);
           peg.append(disc);
         });
         peg.addEventListener('click', () => tap(i));
@@ -1436,6 +1437,344 @@ const TYPES = {
   nonogram,
 };
 
+/* ---------- Pistas (2 niveles por juego) ---------- */
+const refund = (text) => ({ text, refund: true });
+
+function dimWrong(root, correctOf) {
+  let dimmed = 0;
+  root.querySelectorAll('.q-block').forEach((block, i) => {
+    if (block.querySelector('.opt.ok')) return;
+    const correct = correctOf(block, i);
+    const wrong = [...block.querySelectorAll('.opt')].filter((o) => o.textContent !== correct && !o.classList.contains('dim'));
+    if (wrong.length) {
+      wrong[0].classList.add('dim');
+      wrong[0].disabled = true;
+      dimmed += 1;
+    }
+  });
+  return dimmed ? 'Taché una opción incorrecta en cada pregunta que aún no respondes.' : refund('Ya no quedan opciones que descartar.');
+}
+
+const HINTERS = {
+  quiz: (root, p) => dimWrong(root, (_, i) => p.questions[i].options[p.questions[i].answer]),
+  flags: (root, p) => {
+    const names = Object.fromEntries(p.countries.map((c) => [c.flag, c.name]));
+    return dimWrong(root, (block) => names[block.querySelector('.q-big').textContent.trim()]);
+  },
+  listenSet: (root, p) => dimWrong(root, (_, i) => p.items[i].options[p.items[i].answer]),
+
+  riddle: (root, p, level) => {
+    const answer = p.answers[0];
+    if (level === 1) return p.hint ?? `La respuesta tiene ${strip(answer).length} letras.`;
+    const words = answer.split(' ');
+    return words.length > 1
+      ? `La respuesta empieza con «${words[0].toUpperCase()}».`
+      : `La respuesta empieza con «${answer[0].toUpperCase()}» y tiene ${strip(answer).length} letras.`;
+  },
+
+  wordsearch: (root, p, level) => {
+    root.querySelectorAll('.ws-cell.hint').forEach((c) => c.classList.remove('hint'));
+    const cells = [...root.querySelectorAll('.ws-cell')];
+    const n = Math.round(Math.sqrt(cells.length));
+    const item = [...root.querySelectorAll('.ws-words li')].find((li) => !li.classList.contains('done'));
+    if (!item) return refund('Ya encontraste todas las palabras.');
+    const word = strip(item.textContent).toUpperCase();
+    for (let r = 0; r < n; r++)
+      for (let c = 0; c < n; c++)
+        for (const [dr, dc] of DIRS) {
+          const path = [];
+          for (let i = 0; i < word.length; i++) {
+            const rr = r + dr * i;
+            const cc = c + dc * i;
+            if (rr < 0 || rr >= n || cc < 0 || cc >= n || cells[rr * n + cc].textContent !== word[i]) break;
+            path.push(cells[rr * n + cc]);
+          }
+          if (path.length === word.length) {
+            if (level === 1) {
+              path[0].classList.add('hint');
+              return `Busca «${item.textContent}»: empieza en la fila ${r + 1}, columna ${c + 1}.`;
+            }
+            path.forEach((cell) => cell.classList.add('hint'));
+            return `«${item.textContent}» quedó resaltada.`;
+          }
+        }
+    return refund('No pude ubicar la palabra.');
+  },
+
+  sudoku: (root, p, level) => {
+    const cfg = SUDOKU_CONFIGS[p.size ?? 6];
+    const { solution } = makeSudoku(p.seed ?? 3, p.blanks ?? 20, cfg);
+    const cells = [...root.querySelectorAll('.sd-cell')];
+    cells.forEach((c) => c.classList.remove('hint'));
+    const grid = Array.from({ length: cfg.n }, (_, r) => Array.from({ length: cfg.n }, (_, c) => Number(cells[r * cfg.n + c].textContent) || 0));
+    let best = null;
+    let bestCount = 99;
+    for (let r = 0; r < cfg.n; r++)
+      for (let c = 0; c < cfg.n; c++) {
+        if (grid[r][c]) continue;
+        const count = sudokuCandidates(grid, r, c, cfg).length;
+        if (count < bestCount) {
+          best = [r, c];
+          bestCount = count;
+        }
+      }
+    if (!best) return refund('No quedan casillas vacías.');
+    const cell = cells[best[0] * cfg.n + best[1]];
+    if (level === 1) {
+      cell.classList.add('hint');
+      return `Mira la casilla de la fila ${best[0] + 1}, columna ${best[1] + 1}: es la que tiene menos opciones posibles.`;
+    }
+    cell.click();
+    root.querySelectorAll('.sd-pad .btn')[solution[best[0]][best[1]] - 1].click();
+    return `Completé la casilla de la fila ${best[0] + 1}, columna ${best[1] + 1} por ti.`;
+  },
+
+  maze: (root, p, level) => {
+    const cols = p.cols ?? 9;
+    const rows = p.rows ?? 12;
+    const grid = makeMaze(cols, rows, p.seed ?? 9);
+    const player = root.querySelector('.maze-player');
+    const x0 = Math.round((Number(player.getAttribute('cx')) - 4 - MAZE_CELL / 2) / MAZE_CELL);
+    const y0 = Math.round((Number(player.getAttribute('cy')) - 4 - MAZE_CELL / 2) / MAZE_CELL);
+    const steps = { n: [0, -1], e: [1, 0], s: [0, 1], w: [-1, 0] };
+    const prev = new Map([[`${x0},${y0}`, null]]);
+    const queue = [[x0, y0]];
+    while (queue.length) {
+      const [x, y] = queue.shift();
+      if (x === cols - 1 && y === rows - 1) break;
+      for (const d of ['n', 'e', 's', 'w']) {
+        if (grid[y][x][d]) continue;
+        const nx = x + steps[d][0];
+        const ny = y + steps[d][1];
+        if (!prev.has(`${nx},${ny}`)) {
+          prev.set(`${nx},${ny}`, { from: [x, y], d });
+          queue.push([nx, ny]);
+        }
+      }
+    }
+    const path = [[cols - 1, rows - 1]];
+    let key = `${cols - 1},${rows - 1}`;
+    const dirs = [];
+    while (prev.get(key)) {
+      const link = prev.get(key);
+      dirs.unshift(link.d);
+      path.unshift(link.from);
+      key = link.from.join(',');
+    }
+    if (!dirs.length) return refund('Ya estás en la meta.');
+    const words = { n: 'arriba ↑', e: 'la derecha →', s: 'abajo ↓', w: 'la izquierda ←' };
+    if (level === 1) return `Desde donde estás, el camino sigue hacia ${words[dirs[0]]}.`;
+    const svg = root.querySelector('.maze-svg');
+    svg.querySelector('.maze-hint')?.remove();
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+    line.setAttribute('class', 'maze-hint');
+    line.setAttribute('points', path.slice(0, 14).map(([x, y]) => `${4 + x * MAZE_CELL + MAZE_CELL / 2},${4 + y * MAZE_CELL + MAZE_CELL / 2}`).join(' '));
+    svg.append(line);
+    setTimeout(() => line.remove(), 6000);
+    return 'Te marqué con una línea punteada los próximos pasos (desaparece en unos segundos).';
+  },
+
+  crossword: (root, p, level) => {
+    const row = [...root.querySelectorAll('.cw-clue')].find((r) => !r.classList.contains('solved'));
+    if (!row) return refund('Ya resolviste todas las pistas.');
+    const text = row.querySelector('.cw-clue-text').textContent.replace(/^\d+\.\s*/, '').replace(/\s*\(\d+\)$/, '');
+    const entry = p.entries.find((e) => e.clue === text);
+    const word = strip(entry.answer).toUpperCase();
+    const input = row.querySelector('input');
+    if (level === 1) {
+      input.value = word[0];
+      return `«${text}» tiene ${word.length} letras y empieza con «${word[0]}».`;
+    }
+    input.value = word;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return `Resolví «${text}» por ti.`;
+  },
+
+  anagram: (root, p, level) => {
+    const row = [...root.querySelectorAll('.cw-clue')].find((r) => !r.classList.contains('solved'));
+    if (!row) return refund('Ya ordenaste todas las palabras.');
+    const clue = row.querySelector('.cw-clue-text').textContent;
+    const item = p.words.find((w) => w.clue === clue);
+    const word = strip(item.answer).toUpperCase();
+    const input = row.querySelector('input');
+    if (level === 1) {
+      input.value = word[0];
+      return `La palabra de «${clue}» empieza con «${word[0]}».`;
+    }
+    input.value = word;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    return `Ordené por ti la palabra de «${clue}».`;
+  },
+
+  memory: (root, p, level) => {
+    const cards = [...root.querySelectorAll('.mem-card')];
+    const free = cards.filter((c) => !c.classList.contains('ok'));
+    const alreadyUp = new Set(free.filter((c) => c.classList.contains('up') && !c.dataset.flash));
+    const flash = (list, ms) => {
+      list.forEach((c) => {
+        c.classList.add('up');
+        c.dataset.flash = '1';
+      });
+      setTimeout(
+        () =>
+          list.forEach((c) => {
+            delete c.dataset.flash;
+            if (!alreadyUp.has(c) && !c.classList.contains('ok')) c.classList.remove('up');
+          }),
+        ms,
+      );
+    };
+    if (level === 1) {
+      flash(free, 1500);
+      return 'Mira bien: las cartas se muestran un instante.';
+    }
+    const byFace = new Map();
+    free.forEach((c) => {
+      const face = c.querySelector('.mem-face').textContent;
+      byFace.set(face, [...(byFace.get(face) ?? []), c]);
+    });
+    const pair = [...byFace.values()].find((list) => list.length === 2 && list.every((c) => !alreadyUp.has(c)));
+    if (!pair) return refund('No pude elegir una pareja ahora. Prueba de nuevo.');
+    flash(pair, 1800);
+    return 'Te mostré una pareja por un instante.';
+  },
+
+  diffs: (root, p, level) => {
+    const scene = SCENES[p.scene];
+    const svgs = [...root.querySelectorAll('.diff-svg')];
+    const found = new Set([...svgs[0].querySelectorAll('.diff-mark')].map((c) => `${c.getAttribute('cx')},${c.getAttribute('cy')}`));
+    const index = scene.diffs.findIndex((d) => !found.has(`${d.hit[0]},${d.hit[1]}`));
+    if (index < 0) return refund('Ya encontraste todas las diferencias.');
+    const [x, y, r] = scene.diffs[index].hit;
+    const ring = (radius, ox, oy) =>
+      svgs.forEach((svg) => {
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x + ox);
+        circle.setAttribute('cy', y + oy);
+        circle.setAttribute('r', radius);
+        circle.setAttribute('class', 'diff-hint');
+        svg.querySelector('.marks').append(circle);
+        setTimeout(() => circle.remove(), 2800);
+      });
+    if (level === 1) {
+      ring(48, 12, -10);
+      return 'Hay una diferencia dentro del círculo que apareció (en ambas imágenes).';
+    }
+    ring(Math.max(r, 16), 0, 0);
+    return 'Te marqué la posición exacta de una diferencia.';
+  },
+
+  missing: (root, p, level) => {
+    const palette = root.querySelector('.palette');
+    if (!palette) return refund('Primero memoriza los objetos y toca «Ya los memoricé».');
+    const gone = new Set(seededShuffle(p.objects, mulberry32(p.seed ?? 4)).slice(0, p.count ?? 3));
+    const chips = [...palette.querySelectorAll('.chip')].filter((c) => gone.has(c.textContent));
+    chips.forEach((c) => c.classList.remove('hintchip'));
+    chips.slice(0, level === 1 ? 1 : 2).forEach((c) => c.classList.add('hintchip'));
+    return level === 1 ? 'Uno de los objetos que desaparecieron quedó resaltado.' : 'Dos de los objetos que desaparecieron quedaron resaltados.';
+  },
+
+  hanoi: (root, p, level) => {
+    const n = p.discs ?? 5;
+    const pos = {};
+    const pegs = [...root.querySelectorAll('.hn-peg')];
+    pegs.forEach((peg, i) => peg.querySelectorAll('.hn-disc').forEach((d) => (pos[Number(d.dataset.d)] = i)));
+    const next = (k, target) => {
+      if (k === 0) return null;
+      if (pos[k] === target) return next(k - 1, target);
+      const sub = next(k - 1, 3 - pos[k] - target);
+      return sub ?? [pos[k], target];
+    };
+    const move = next(n, 2);
+    if (!move) return refund('La torre ya está completa.');
+    const text = `Mueve el disco de arriba de la columna ${move[0] + 1} a la columna ${move[1] + 1}.`;
+    if (level === 2) {
+      [move[0], move[1]].forEach((i) => pegs[i].classList.add('hint'));
+      setTimeout(() => pegs.forEach((peg) => peg.classList.remove('hint')), 2600);
+    }
+    return text;
+  },
+
+  lightsout: (root, p, level) => {
+    const n = p.size ?? 5;
+    const cells = [...root.querySelectorAll('.lo-cell')];
+    cells.forEach((c) => c.classList.remove('hint'));
+    const start = cells.map((c) => (c.classList.contains('on') ? 1 : 0));
+    let solution = null;
+    for (let mask = 0; mask < 1 << n && !solution; mask++) {
+      const g = Array.from({ length: n }, (_, r) => Array.from({ length: n }, (_, c) => start[r * n + c]));
+      const presses = [];
+      const press = (r, c) => {
+        presses.push([r, c]);
+        for (const [dr, dc] of [[0, 0], [1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const rr = r + dr;
+          const cc = c + dc;
+          if (rr >= 0 && rr < n && cc >= 0 && cc < n) g[rr][cc] ^= 1;
+        }
+      };
+      for (let c = 0; c < n; c++) if ((mask >> c) & 1) press(0, c);
+      for (let r = 1; r < n; r++) for (let c = 0; c < n; c++) if (g[r - 1][c]) press(r, c);
+      if (g[n - 1].every((v) => v === 0)) solution = presses;
+    }
+    if (!solution) return refund('No encuentro una solución desde aquí. Usa «Reiniciar».');
+    if (!solution.length) return refund('Ya están todas apagadas.');
+    solution.slice(0, level === 1 ? 1 : 3).forEach(([r, c]) => cells[r * n + c].classList.add('hint'));
+    return level === 1
+      ? 'Toca la casilla resaltada: es parte de la solución.'
+      : 'Las casillas resaltadas son parte de la solución (el orden no importa).';
+  },
+
+  wordle: (root, p, level) => {
+    const match = root.querySelector('.diff-count')?.textContent.match(/Palabra (\d+)/);
+    const word = strip(p.words[Number(match?.[1] ?? 1) - 1]).toUpperCase();
+    return level === 1
+      ? `La palabra empieza con «${word[0]}».`
+      : `La palabra termina con «${word[word.length - 1]}» y tiene una «${word[2]}» en el centro.`;
+  },
+
+  nonogram: (root, p, level) => {
+    const cols = p.art[0].length;
+    const cells = [...root.querySelectorAll('.ng-cell')];
+    const fill = (cell) => {
+      for (let guard = 0; guard < 3 && !cell.classList.contains('fill'); guard++) cell.click();
+    };
+    const missingCells = [];
+    p.art.forEach((row, r) =>
+      [...row].forEach((ch, c) => {
+        if (ch === 'X' && !cells[r * cols + c].classList.contains('fill')) missingCells.push([r, c]);
+      }),
+    );
+    if (!missingCells.length) return refund('Todas las casillas del dibujo ya están rellenas. Revisa si te sobra alguna.');
+    if (level === 1) {
+      const [r, c] = missingCells[0];
+      fill(cells[r * cols + c]);
+      return `Rellené una casilla en la fila ${r + 1}, columna ${c + 1}.`;
+    }
+    const row = missingCells[0][0];
+    missingCells.filter(([r]) => r === row).forEach(([r, c]) => fill(cells[r * cols + c]));
+    return `Completé las casillas rellenas de la fila ${row + 1}.`;
+  },
+
+  slide: (root, p, level) => {
+    const tiles = [...root.querySelectorAll('.slide-tile')];
+    const n = Math.round(Math.sqrt(tiles.length));
+    if (level === 1) return `Ordena las piezas del 1 al ${n * n - 1}, de izquierda a derecha y de arriba abajo. El hueco queda abajo, a la derecha.`;
+    const values = tiles.map((t) => (t.classList.contains('blank') ? 0 : Number(t.querySelector('.slide-num').textContent)));
+    const empty = values.indexOf(0);
+    const dist = (i, v) => (v ? Math.abs(Math.floor(i / n) - Math.floor((v - 1) / n)) + Math.abs((i % n) - ((v - 1) % n)) : 0);
+    const er = Math.floor(empty / n);
+    const ec = empty % n;
+    const around = [er > 0 && empty - n, er < n - 1 && empty + n, ec > 0 && empty - 1, ec < n - 1 && empty + 1].filter((x) => x !== false);
+    const best = around.reduce((a, b) => (dist(b, values[b]) - dist(empty, values[b]) < dist(a, values[a]) - dist(empty, values[a]) ? b : a));
+    tiles[best].classList.add('hint');
+    setTimeout(() => tiles[best]?.classList.remove('hint'), 2600);
+    return `Prueba moviendo la pieza ${values[best]} (resaltada).`;
+  },
+};
+
+/* ---------- Etapas de juego con Pista y Reiniciar ---------- */
+const MAX_HINTS = 2;
+
 export function renderPuzzles(root, puzzles, onAllSolved) {
   root.replaceChildren();
   let index = 0;
@@ -1444,13 +1783,27 @@ export function renderPuzzles(root, puzzles, onAllSolved) {
     root.replaceChildren();
     const puzzle = puzzles[index];
     const head = el('div', 'stage-head');
-    head.append(
-      el('span', 'stage-count', `Prueba ${index + 1} de ${puzzles.length}`),
-      el('h3', '', puzzle.title),
-    );
-    const body = el('div', 'stage-body');
-    root.append(head, body);
-    TYPES[puzzle.type](body, puzzle, () => {
+    head.append(el('span', 'stage-count', `Prueba ${index + 1} de ${puzzles.length}`), el('h3', '', puzzle.title));
+
+    let used = 0;
+    const hintMsg = el('p', 'hint-msg');
+    hintMsg.hidden = true;
+    const hintBtn = el('button', 'btn small-btn hint-btn');
+    hintBtn.type = 'button';
+    const resetBtn = el('button', 'btn small-btn reset-btn', '↺ Reiniciar');
+    resetBtn.type = 'button';
+    const tools = el('div', 'stage-tools');
+    tools.append(hintBtn, resetBtn);
+
+    let body = el('div', 'stage-body');
+    const updateHintBtn = () => {
+      hintBtn.textContent = used >= MAX_HINTS ? '💡 Sin más pistas' : `💡 Pista (${MAX_HINTS - used})`;
+      hintBtn.disabled = used >= MAX_HINTS;
+    };
+
+    const solved = () => {
+      tools.hidden = true;
+      hintMsg.hidden = true;
       const next = el('button', 'btn primary', index + 1 < puzzles.length ? 'Siguiente prueba →' : 'Completar pruebas ✓');
       next.addEventListener('click', () => {
         index += 1;
@@ -1458,7 +1811,36 @@ export function renderPuzzles(root, puzzles, onAllSolved) {
         else onAllSolved();
       });
       root.append(next);
+    };
+
+    const mount = () => {
+      const fresh = el('div', 'stage-body');
+      body.replaceWith(fresh);
+      body = fresh;
+      hintMsg.hidden = true;
+      TYPES[puzzle.type](body, puzzle, solved);
+    };
+
+    hintBtn.addEventListener('click', () => {
+      if (used >= MAX_HINTS) return;
+      let result;
+      try {
+        result = HINTERS[puzzle.type]?.(body, puzzle, used + 1);
+      } catch {
+        result = refund('No pude calcular una pista ahora. Intenta de nuevo.');
+      }
+      if (result === undefined) result = refund('Este juego no tiene pistas.');
+      const text = typeof result === 'string' ? result : result.text;
+      if (typeof result === 'string') used += 1;
+      hintMsg.textContent = text;
+      hintMsg.hidden = false;
+      updateHintBtn();
     });
+    resetBtn.addEventListener('click', mount);
+
+    root.append(head, tools, hintMsg, body);
+    updateHintBtn();
+    TYPES[puzzle.type](body, puzzle, solved);
   };
 
   showStage();
