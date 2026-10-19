@@ -1499,3 +1499,6 @@ small {
     transition: none !important;
   }
 }
+
+.collage-box { margin-top: 18px; display: grid; gap: 12px; justify-items: center; }
+.collage { width: 100%; border-radius: 14px; }

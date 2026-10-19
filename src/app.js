@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019l';
-import { CODE_HASHES } from './codes.js?v=20261019l';
-import { hashCode } from './hash.js?v=20261019l';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019l';
-import { portrait, medalSVG } from './emblem.js?v=20261019l';
-import { renderPuzzles } from './puzzles.js?v=20261019l';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019m';
+import { CODE_HASHES } from './codes.js?v=20261019m';
+import { hashCode } from './hash.js?v=20261019m';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019m';
+import { portrait, medalSVG } from './emblem.js?v=20261019m';
+import { renderPuzzles } from './puzzles.js?v=20261019m';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
@@ -457,11 +457,11 @@ function taskDone(t, photoData) {
   );
 }
 
-function shareButton(dataUrl, title) {
-  const btn = h('button', { class: 'btn small-btn', type: 'button', hidden: '' }, '📤 Compartir foto');
+function shareButton(dataUrl, title, name = 'prueba.jpg', label = '📤 Compartir foto') {
+  const btn = h('button', { class: 'btn small-btn', type: 'button', hidden: '' }, label);
   (async () => {
     const blob = await (await fetch(dataUrl)).blob();
-    const file = new File([blob], 'prueba.jpg', { type: 'image/jpeg' });
+    const file = new File([blob], name, { type: 'image/jpeg' });
     if (!navigator.canShare?.({ files: [file] })) return;
     btn.hidden = false;
     btn.addEventListener('click', () => navigator.share({ files: [file], title }).catch(() => {}));
@@ -571,6 +571,56 @@ async function taskView(n) {
   );
 }
 
+function loadImg(src) {
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.onload = () => res(img);
+    img.onerror = rej;
+    img.src = src;
+  });
+}
+
+async function makeCollage(photos) {
+  const W = 1080;
+  const cols = photos.length <= 6 ? 2 : 3;
+  const gap = 16;
+  const cell = Math.floor((W - gap * (cols + 1)) / cols);
+  const rows = Math.ceil(photos.length / cols);
+  const top = 300;
+  const bottom = 200;
+  const H = top + rows * (cell + gap) + gap + bottom;
+  const c = document.createElement('canvas');
+  c.width = W;
+  c.height = H;
+  const g = c.getContext('2d');
+  g.fillStyle = '#0b0d12';
+  g.fillRect(0, 0, W, H);
+  g.textAlign = 'center';
+  g.fillStyle = '#e8c872';
+  g.font = '700 84px ui-serif, Georgia, serif';
+  g.fillText('¡Feliz Cumpleaños', W / 2, 150);
+  g.fillText('Amor!', W / 2, 250);
+  const imgs = await Promise.all(photos.map(loadImg));
+  imgs.forEach((img, i) => {
+    const r = Math.floor(i / cols);
+    const inRow = r === rows - 1 ? photos.length - r * cols : cols;
+    const x0 = (W - (inRow * cell + (inRow - 1) * gap)) / 2;
+    const x = x0 + (i - r * cols) * (cell + gap);
+    const y = top + r * (cell + gap);
+    const side = Math.min(img.width, img.height);
+    g.save();
+    g.beginPath();
+    g.roundRect(x, y, cell, cell, 24);
+    g.clip();
+    g.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, x, y, cell, cell);
+    g.restore();
+  });
+  g.fillStyle = '#e8c872';
+  g.font = '500 48px ui-serif, Georgia, serif';
+  g.fillText('Piyi, la Velocista de Jade · Nivel 32', W / 2, H - 100);
+  return c.toDataURL('image/jpeg', 0.9);
+}
+
 async function chronicle() {
   if (store.openedCount() < TOTAL_CHESTS && !DEV) {
     location.hash = '#/';
@@ -578,6 +628,7 @@ async function chronicle() {
   }
   setScene('final');
   const grid = h('div', { class: 'gallery' });
+  const collageBox = h('div', { class: 'collage-box' });
   const gifts = h('ol', { class: 'gift-list' }, CHESTS.map((c) => h('li', {}, c.gift?.name ?? 'Regalo sorpresa')));
   mount(
     h(
@@ -593,10 +644,13 @@ async function chronicle() {
       gifts,
       h('h3', {}, 'Tus retos físicos'),
       grid,
+      collageBox,
     ),
   );
+  const shots = [];
   for (const t of TASKS.filter((x) => x.type === 'F')) {
     const photo = await getPhoto(`t${t.n}`).catch(() => null);
+    if (photo) shots.push(photo);
     grid.append(
       h(
         'figure',
@@ -606,6 +660,24 @@ async function chronicle() {
       ),
     );
   }
+  if (!shots.length) return;
+  const make = h('button', { class: 'btn primary block', type: 'button' }, '🖼️ Crear mi collage');
+  make.addEventListener('click', async () => {
+    make.disabled = true;
+    try {
+      const url = await makeCollage(shots);
+      make.remove();
+      collageBox.append(
+        h('img', { class: 'collage', src: url, alt: '¡Feliz Cumpleaños Amor!' }),
+        shareButton(url, '¡Feliz Cumpleaños Amor!', 'collage.jpg', '📤 Enviar mi collage'),
+        h('p', { class: 'hint-msg' }, 'Si no ves el botón, deja el dedo apretado sobre la imagen y elige Guardar.'),
+      );
+    } catch {
+      make.disabled = false;
+      make.textContent = 'No se pudo crear. Reintentar';
+    }
+  });
+  collageBox.append(h('p', { class: 'story' }, 'Con tus fotos armamos un recuerdo para ti.'), make);
 }
 
 function render() {
