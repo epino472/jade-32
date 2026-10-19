@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js';
-import { CODE_HASHES } from './codes.js';
-import { hashCode } from './hash.js';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js';
-import { portrait, medalSVG } from './emblem.js';
-import { renderPuzzles } from './puzzles.js';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261018b';
+import { CODE_HASHES } from './codes.js?v=20261018b';
+import { hashCode } from './hash.js?v=20261018b';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261018b';
+import { portrait, medalSVG } from './emblem.js?v=20261018b';
+import { renderPuzzles } from './puzzles.js?v=20261018b';
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
