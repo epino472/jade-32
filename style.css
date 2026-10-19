@@ -1354,37 +1354,53 @@ small {
 
 .ng-grid {
   display: grid;
-  grid-template-columns: auto repeat(var(--cols), 1fr);
-  gap: 2px;
-  width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
+  grid-template-columns: auto repeat(var(--cols), minmax(0, 1fr));
+  gap: 3px;
+  width: calc(100% + 16px);
+  max-width: 380px;
+  margin: 0 -8px;
+  align-items: stretch;
 }
 .ng-clue {
   display: flex;
-  color: var(--gold);
-  font-size: 0.8rem;
-  line-height: 1.15;
+  color: var(--ivory);
+  font-size: 0.85rem;
+  line-height: 1;
+}
+.ng-clue span {
+  min-width: 1.5em;
+  padding: 3px 5px;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 700;
+  background: rgba(217, 189, 126, 0.2);
+  border: 1px solid rgba(217, 189, 126, 0.35);
 }
 .ng-clue.col {
   flex-direction: column;
   justify-content: flex-end;
   align-items: center;
-  padding-bottom: 3px;
+  gap: 3px;
+  padding-bottom: 4px;
 }
 .ng-clue.row {
   justify-content: flex-end;
   align-items: center;
-  gap: 4px;
-  padding-right: 6px;
+  gap: 5px;
+  padding-right: 5px;
 }
 .ng-cell {
   appearance: none;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: auto;
+  align-self: start;
   aspect-ratio: 1;
   padding: 0;
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line-strong);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
 }
 .ng-cell.fill {
@@ -1393,6 +1409,22 @@ small {
 }
 .ng-cell.cross::before {
   content: '×';
+}
+
+/* Las casillas cuadradas de las cuadrículas nunca deben ensancharse más que su columna */
+.mem-card,
+.sd-cell,
+.lo-cell,
+.ws-cell,
+.chip,
+.slide-tile {
+  min-width: 0;
+  min-height: 0;
+}
+.mem-card {
+  width: 100%;
+  height: auto;
+  align-self: start;
 }
 
 /* ---------- Pistas y reinicio ---------- */

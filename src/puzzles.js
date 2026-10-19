@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261019b';
+import { SCENES } from './scenes.js?v=20261019e';
 
 const strip = (s) =>
   s
@@ -1425,7 +1425,7 @@ function nonogram(root, puzzle, onSolved) {
   };
 
   root.append(
-    el('p', 'q-text', puzzle.prompt ?? 'Los números dicen cuántas casillas seguidas van rellenas en cada fila y columna. Toca una casilla para rellenarla, otra vez para marcarla con una cruz, y otra para borrarla. Al terminar aparece un dibujo.'),
+    el('p', 'q-text', puzzle.prompt ?? 'Cada número dice cuántas casillas seguidas van rellenas en esa fila o columna. Si hay dos números juntos, por ejemplo [2] [2], son dos grupos separados por al menos una casilla vacía: no es el número 22. Toca una casilla para rellenarla, otra vez para marcarla con una cruz, y otra para borrarla. Al terminar aparece un dibujo.'),
     grid,
   );
 }
