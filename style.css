@@ -21,6 +21,25 @@
 
 html {
   background: var(--ink);
+  touch-action: manipulation;
+}
+body {
+  touch-action: manipulation;
+  -webkit-text-size-adjust: 100%;
+}
+button,
+.node,
+.row,
+.today {
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input,
+textarea {
+  -webkit-user-select: text;
+  user-select: text;
 }
 html,
 body {
