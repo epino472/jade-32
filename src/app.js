@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019e';
-import { CODE_HASHES } from './codes.js?v=20261019e';
-import { hashCode } from './hash.js?v=20261019e';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019e';
-import { portrait, medalSVG } from './emblem.js?v=20261019e';
-import { renderPuzzles } from './puzzles.js?v=20261019e';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019f';
+import { CODE_HASHES } from './codes.js?v=20261019f';
+import { hashCode } from './hash.js?v=20261019f';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019f';
+import { portrait, medalSVG } from './emblem.js?v=20261019f';
+import { renderPuzzles } from './puzzles.js?v=20261019f';
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
@@ -106,17 +106,18 @@ function intro() {
 function todayCards() {
   const cards = [];
   const pendingPractice = PRACTICE.find((p) => !store.isDone(p.n));
-  if (pendingPractice && (DEV || todayISO() < START_DATE)) {
-    cards.push(
-      h(
-        'a',
-        { class: 'today', href: `#/task/${pendingPractice.n}` },
-        h('p', { class: 'eyebrow' }, pendingPractice.label),
-        h('strong', {}, pendingPractice.title.replace('Prueba 0: ', '')),
-        h('small', {}, pendingPractice.blurb),
-      ),
-    );
-  }
+  const gameStarted = todayISO() >= START_DATE;
+  const practiceCard =
+    pendingPractice && (DEV || todayISO() < addDays(START_DATE, 7))
+      ? h(
+          'a',
+          { class: 'today', href: `#/task/${pendingPractice.n}` },
+          h('p', { class: 'eyebrow' }, pendingPractice.label),
+          h('strong', {}, pendingPractice.title.replace('Prueba 0: ', '')),
+          h('small', {}, pendingPractice.blurb),
+        )
+      : null;
+  if (practiceCard && !gameStarted) cards.push(practiceCard);
   if (!DEV && !isStandalone() && !store.noticeHidden()) {
     cards.push(
       h(
@@ -181,6 +182,7 @@ function todayCards() {
       );
     }
   }
+  if (practiceCard && gameStarted) cards.push(practiceCard);
   return cards;
 }
 
