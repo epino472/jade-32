@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261018e';
-import { CODE_HASHES } from './codes.js?v=20261018e';
-import { hashCode } from './hash.js?v=20261018e';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261018e';
-import { portrait, medalSVG } from './emblem.js?v=20261018e';
-import { renderPuzzles } from './puzzles.js?v=20261018e';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019a';
+import { CODE_HASHES } from './codes.js?v=20261019a';
+import { hashCode } from './hash.js?v=20261019a';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019a';
+import { portrait, medalSVG } from './emblem.js?v=20261019a';
+import { renderPuzzles } from './puzzles.js?v=20261019a';
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
@@ -315,6 +315,7 @@ function chestPanel(chest) {
     placeholder: 'Código secreto',
     autocomplete: 'off',
     autocapitalize: 'characters',
+    autocorrect: 'off',
     spellcheck: 'false',
   });
   const message = h('p', { class: 'feedback' });

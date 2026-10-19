@@ -1269,6 +1269,43 @@ small {
   background: #3a3a44;
   border-color: #3a3a44;
 }
+.wd-form {
+  display: flex;
+  gap: 8px;
+}
+.wd-input {
+  flex: 1;
+  min-width: 0;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: 600;
+}
+.wd-used {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+  min-height: 1.6rem;
+}
+.wd-letter {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.wd-letter.correct {
+  background: #2c7a60;
+}
+.wd-letter.present {
+  background: #a9822a;
+}
+.wd-letter.absent {
+  background: #3a3a44;
+}
 .wd-keys {
   display: flex;
   flex-direction: column;

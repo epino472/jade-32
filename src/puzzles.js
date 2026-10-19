@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261018e';
+import { SCENES } from './scenes.js?v=20261019a';
 
 const strip = (s) =>
   s
@@ -59,6 +59,7 @@ function riddle(root, puzzle, onSolved) {
   input.type = 'text';
   input.autocomplete = 'off';
   input.autocapitalize = 'none';
+  input.setAttribute('autocorrect', 'off');
   input.placeholder = 'Tu respuesta';
   const btn = el('button', 'btn', 'Responder');
   const msg = el('p', 'feedback');
@@ -747,6 +748,9 @@ function crossword(root, puzzle, onSolved) {
       input.maxLength = e.word.length;
       input.autocomplete = 'off';
       input.autocapitalize = 'none';
+    input.setAttribute('autocorrect', 'off');
+      input.setAttribute('autocorrect', 'off');
+  input.setAttribute('autocorrect', 'off');
       input.spellcheck = false;
       input.placeholder = '·'.repeat(e.word.length);
       input.addEventListener('input', () => {
@@ -965,6 +969,8 @@ function anagram(root, puzzle, onSolved) {
     input.type = 'text';
     input.autocomplete = 'off';
     input.autocapitalize = 'none';
+    input.setAttribute('autocorrect', 'off');
+  input.setAttribute('autocorrect', 'off');
     input.spellcheck = false;
     input.placeholder = 'Tu respuesta';
     input.addEventListener('input', () => {
@@ -1210,9 +1216,23 @@ function wordle(root, puzzle, onSolved) {
   const status = el('p', 'feedback');
   const progress = el('p', 'diff-count');
   const board = el('div', 'wd-board');
-  const keyboard = el('div', 'wd-keys');
+  const used = el('div', 'wd-used');
   const keyState = new Map();
   const rank = { absent: 1, present: 2, correct: 3 };
+
+  const input = el('input', 'text-input wd-input');
+  input.type = 'text';
+  input.maxLength = LEN;
+  input.autocomplete = 'off';
+  input.autocapitalize = 'characters';
+  input.spellcheck = false;
+  input.setAttribute('autocorrect', 'off');
+  input.setAttribute('enterkeyhint', 'go');
+  input.placeholder = 'Escribe tu palabra';
+  const tryBtn = el('button', 'btn primary', 'Probar');
+  tryBtn.type = 'button';
+  const form = el('div', 'wd-form');
+  form.append(input, tryBtn);
 
   const evaluate = (guess, answer) => {
     const result = Array(LEN).fill('absent');
@@ -1243,23 +1263,32 @@ function wordle(root, puzzle, onSolved) {
   });
 
   const paintRow = () => {
-    rows[row].forEach((cell, i) => (cell.textContent = current[i] ?? ''));
+    if (row < TRIES) rows[row].forEach((cell, i) => (cell.textContent = current[i] ?? ''));
+  };
+
+  const paintUsed = () => {
+    used.replaceChildren(
+      ...[...keyState.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([letter, state]) => el('span', `wd-letter ${state}`, letter)),
+    );
   };
 
   const resetBoard = () => {
     row = 0;
     current = '';
+    input.value = '';
     keyState.clear();
     rows.flat().forEach((cell) => {
       cell.textContent = '';
       cell.className = 'wd-cell';
     });
-    keyboard.querySelectorAll('.wd-key').forEach((k) => k.classList.remove('correct', 'present', 'absent'));
+    paintUsed();
     progress.textContent = `Palabra ${wordIndex + 1} de ${answers.length}`;
   };
 
   const submit = () => {
-    if (finished) return;
+    if (finished || row >= TRIES) return;
     if (current.length < LEN) {
       status.textContent = 'Faltan letras.';
       status.className = 'feedback bad';
@@ -1272,30 +1301,30 @@ function wordle(root, puzzle, onSolved) {
       const letter = current[i];
       if (!keyState.has(letter) || rank[state] > rank[keyState.get(letter)]) keyState.set(letter, state);
     });
-    keyboard.querySelectorAll('.wd-key').forEach((k) => {
-      const st = keyState.get(k.dataset.k);
-      if (st) {
-        k.classList.remove('correct', 'present', 'absent');
-        k.classList.add(st);
-      }
-    });
+    paintUsed();
     if (current === answer) {
       status.textContent = '¡Correcto!';
       status.className = 'feedback good';
       wordIndex += 1;
       if (wordIndex === answers.length) {
         finished = true;
+        input.disabled = true;
+        tryBtn.disabled = true;
         onSolved();
         return;
       }
+      input.disabled = true;
       setTimeout(() => {
         status.textContent = '';
+        input.disabled = false;
         resetBoard();
+        input.focus();
       }, 900);
       return;
     }
     row += 1;
     current = '';
+    input.value = '';
     if (row === TRIES) {
       status.textContent = 'Se acabaron los intentos. Empieza otra vez con la misma palabra.';
       status.className = 'feedback bad';
@@ -1305,43 +1334,28 @@ function wordle(root, puzzle, onSolved) {
     }
   };
 
-  const press = (k) => {
-    if (finished || row >= TRIES) return;
-    if (k === 'ENTER') return submit();
-    if (k === 'BACK') current = current.slice(0, -1);
-    else if (/^[A-Z]$/.test(k) && current.length < LEN) current += k;
+  input.addEventListener('input', () => {
+    const clean = strip(input.value).toUpperCase().slice(0, LEN);
+    input.value = clean;
+    current = clean;
     paintRow();
-  };
-
-  for (const line of ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM']) {
-    const r = el('div', 'wd-keyrow');
-    if (line.startsWith('Z')) r.append(makeKey('ENTER', 'Enter'));
-    for (const ch of line) r.append(makeKey(ch, ch));
-    if (line.startsWith('Z')) r.append(makeKey('BACK', '⌫'));
-    keyboard.append(r);
-  }
-  function makeKey(code, label) {
-    const key = el('button', `wd-key${code.length > 1 ? ' wide' : ''}`, label);
-    key.type = 'button';
-    key.dataset.k = code;
-    key.addEventListener('click', () => press(code));
-    return key;
-  }
-  const onKey = (e) => {
-    if (!root.isConnected) return document.removeEventListener('keydown', onKey);
-    if (e.metaKey || e.ctrlKey || e.altKey) return;
-    if (e.key === 'Enter') press('ENTER');
-    else if (e.key === 'Backspace') press('BACK');
-    else if (/^[a-zA-Z]$/.test(e.key)) press(e.key.toUpperCase());
-  };
-  document.addEventListener('keydown', onKey);
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      submit();
+    }
+  });
+  tryBtn.addEventListener('click', submit);
+  board.addEventListener('click', () => input.focus());
 
   root.append(
     el('p', 'q-text', puzzle.prompt ?? 'Adivina la palabra secreta de 5 letras en 6 intentos. Verde: letra bien ubicada. Amarillo: está, pero en otro lugar. Gris: no está.'),
     progress,
     board,
     status,
-    keyboard,
+    used,
+    form,
   );
   resetBoard();
 }
