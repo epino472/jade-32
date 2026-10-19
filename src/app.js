@@ -1,9 +1,14 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019f';
-import { CODE_HASHES } from './codes.js?v=20261019f';
-import { hashCode } from './hash.js?v=20261019f';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019f';
-import { portrait, medalSVG } from './emblem.js?v=20261019f';
-import { renderPuzzles } from './puzzles.js?v=20261019f';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019h';
+import { CODE_HASHES } from './codes.js?v=20261019h';
+import { hashCode } from './hash.js?v=20261019h';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019h';
+import { portrait, medalSVG } from './emblem.js?v=20261019h';
+import { renderPuzzles } from './puzzles.js?v=20261019h';
+
+const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {});
+}
 
 const app = document.getElementById('app');
 const params = new URLSearchParams(location.search);
@@ -245,6 +250,7 @@ function home() {
       ...todayCards(),
       list,
       opened >= TOTAL_CHESTS ? h('a', { class: 'btn primary block', href: '#/chronicle' }, 'Ver la Crónica') : null,
+      h('p', { class: 'version' }, `versión ${APP_VERSION}${navigator.serviceWorker?.controller ? ' · auto' : ''}`),
       DEV
         ? h(
             'button',

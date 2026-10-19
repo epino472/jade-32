@@ -1427,6 +1427,14 @@ small {
   align-self: start;
 }
 
+.version {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
 /* ---------- Pistas y reinicio ---------- */
 .stage-tools {
   display: flex;
