@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261019h';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261019l';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -178,8 +178,9 @@ export const PRACTICE = [
     idx: 0,
     label: 'Práctica extra · Prueba de la cámara',
     blurb: 'Una foto rápida para comprobar que todo funciona.',
-    doneTitle: '¡Foto recibida!',
-    doneNote: 'Tu cámara funciona de maravilla. El reino te espera el 19 de octubre.',
+    doneTitle: '¡Foto guardada!',
+    doneNote: 'Tu foto quedó guardada en la app de tu celular; no se envía a ningún lado. Con el botón «Compartir foto» puedes mandársela a Esteban. El reino te espera el 19 de octubre.',
+    doneLive: 'Tu foto quedó guardada en la app de tu celular; no se envía a ningún lado. Con el botón «Compartir foto» puedes mandársela a Esteban.',
   },
 ];
 

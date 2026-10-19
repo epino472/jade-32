@@ -356,7 +356,7 @@ const ANAGRAMAS_DEPORTE = {
   seed: 2,
   words: [
     { answer: 'SPRINT', clue: 'Carrera corta a máxima velocidad' },
-    { answer: 'META', clue: 'Allí termina la carrera' },
+    { answer: 'META', alts: ['TEMA', 'MATE'], clue: 'Allí termina la carrera' },
     { answer: 'PISTA', clue: 'Donde corren los velocistas' },
     { answer: 'RITMO', clue: 'Los minutos que tardas por cada kilómetro' },
     { answer: 'TROTE', clue: 'Correr suave, sin prisa' },
@@ -593,7 +593,7 @@ export const P2 = game(
     {
       type: 'nonogram',
       title: 'El dibujo escondido',
-      art: ['.XX..XX.', 'XXXXXXXX', 'XXXXXXXX', 'XX.XXXXX', '.XXXXXX.', '..XXXX..', '...XX...'],
+      art: ['.XX..XX.', 'XXXXXXXX', 'XXXXXXXX', 'XXXXXXXX', '.XXXXXX.', '..XXXX..', '...XX...'],
     },
   ],
 );

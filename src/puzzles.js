@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261019h';
+import { SCENES } from './scenes.js?v=20261019l';
 
 const strip = (s) =>
   s
@@ -957,6 +957,7 @@ function anagram(root, puzzle, onSolved) {
   root.append(el('p', 'q-text', puzzle.prompt ?? 'Ordena las letras para formar la palabra de la pista.'));
   for (const item of puzzle.words) {
     const word = strip(item.answer).toUpperCase();
+    const accepted = new Set([word, ...(item.alts ?? []).map((a) => strip(a).toUpperCase())]);
     let letters = word.split('');
     let tries = 0;
     do {
@@ -974,7 +975,7 @@ function anagram(root, puzzle, onSolved) {
     input.spellcheck = false;
     input.placeholder = 'Tu respuesta';
     input.addEventListener('input', () => {
-      if (strip(input.value).toUpperCase() !== word) return;
+      if (!accepted.has(strip(input.value).toUpperCase())) return;
       input.disabled = true;
       row.classList.add('solved');
       remaining -= 1;

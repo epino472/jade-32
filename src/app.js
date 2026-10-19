@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019h';
-import { CODE_HASHES } from './codes.js?v=20261019h';
-import { hashCode } from './hash.js?v=20261019h';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019h';
-import { portrait, medalSVG } from './emblem.js?v=20261019h';
-import { renderPuzzles } from './puzzles.js?v=20261019h';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019l';
+import { CODE_HASHES } from './codes.js?v=20261019l';
+import { hashCode } from './hash.js?v=20261019l';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019l';
+import { portrait, medalSVG } from './emblem.js?v=20261019l';
+import { renderPuzzles } from './puzzles.js?v=20261019l';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
@@ -188,6 +188,9 @@ function todayCards() {
     }
   }
   if (practiceCard && gameStarted) cards.push(practiceCard);
+  if (store.isDone('p3') && (DEV || todayISO() < addDays(START_DATE, 14))) {
+    cards.push(h('a', { class: 'btn ghost block photo-link', href: '#/task/p3' }, 'Ver mi foto de prueba de la cámara'));
+  }
   return cards;
 }
 
@@ -402,13 +405,14 @@ function chestView(id) {
   );
 }
 
-function taskDone(t) {
+function taskDone(t, photoData) {
   if (isPractice(t.n)) {
     const node = overlay(
       h('p', { class: 'eyebrow' }, 'Práctica completada'),
       h('div', { class: 'medal-wrap', html: medalSVG('00') }),
       h('h2', {}, t.doneTitle),
-      h('p', { class: 'lead' }, t.doneNote),
+      h('p', { class: 'lead' }, todayISO() >= START_DATE ? t.doneLive ?? 'Gracias por probar. ¡Sigue con la prueba del día!' : t.doneNote),
+      photoData ? shareButton(photoData, t.title) : null,
       h(
         'button',
         {
@@ -437,6 +441,7 @@ function taskDone(t) {
     h('div', { class: 'medal-wrap', html: medalSVG(pad(t.n)) }),
     h('h2', {}, `Prueba ${t.n} de ${TOTAL_TASKS}`),
     h('p', { class: 'lead' }, note),
+    photoData ? shareButton(photoData, t.title) : null,
     h(
       'button',
       {
@@ -452,10 +457,22 @@ function taskDone(t) {
   );
 }
 
+function shareButton(dataUrl, title) {
+  const btn = h('button', { class: 'btn small-btn', type: 'button', hidden: '' }, '📤 Compartir foto');
+  (async () => {
+    const blob = await (await fetch(dataUrl)).blob();
+    const file = new File([blob], 'prueba.jpg', { type: 'image/jpeg' });
+    if (!navigator.canShare?.({ files: [file] })) return;
+    btn.hidden = false;
+    btn.addEventListener('click', () => navigator.share({ files: [file], title }).catch(() => {}));
+  })().catch(() => {});
+  return btn;
+}
+
 async function completeTask(t, photoData) {
   if (photoData) await savePhoto(`t${t.n}`, photoData);
   store.markDone(t.n);
-  taskDone(t);
+  taskDone(t, photoData);
 }
 
 function physicalPanel(t) {
@@ -511,7 +528,7 @@ async function taskView(n) {
   if (state === 'done') {
     body.append(h('p', { class: 'feedback good' }, 'Prueba completada ✓'));
     const photo = await getPhoto(`t${n}`).catch(() => null);
-    if (photo) body.append(h('img', { class: 'preview', src: photo, alt: 'Foto de la prueba' }));
+    if (photo) body.append(h('img', { class: 'preview', src: photo, alt: 'Foto de la prueba' }), shareButton(photo, t.title));
   } else if (t.puzzles?.length) {
     const stage = h('div', { class: 'stage' });
     body.append(stage);
