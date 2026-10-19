@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261019m';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261019n';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -52,7 +52,7 @@ export const CHESTS = [
     id: 3,
     title: 'La Biblioteca de Jade',
     story: 'Los sabios del reino hacen preguntas que solo una mente ágil responde.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Polera Running Adidas' },
     tasks: [T7, physical(
         'El Ritmo de Jade',
         'Un esfuerzo continuo y parejo: se cuenta el tiempo del reloj.',
@@ -64,7 +64,7 @@ export const CHESTS = [
     id: 4,
     title: 'Velocista Renacida',
     story: 'La pista antigua vuelve a encenderse. Los espíritus de las velocistas esperan a que Piyi recuerde cómo vuela.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Calzas deportivas Adidas' },
     tasks: [T10, physical(
         'Velocista Renacida',
         'Sprints al 90%, volviendo caminando para recuperarte por completo entre cada uno.',
@@ -88,7 +88,7 @@ export const CHESTS = [
     id: 6,
     title: 'El Festín Oculto',
     story: 'El banquete del reino está escondido entre las letras. Solo quien encuentra cada plato puede sentarse a la mesa.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Atuendo de pádel Adidas' },
     tasks: [T16, physical(
         'Fuerza de Piernas',
         'La última sesión pesada antes de la carrera. En la Speediance, 3 rondas con 90 segundos de descanso entre rondas.',
