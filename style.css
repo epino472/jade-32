@@ -1502,3 +1502,4 @@ small {
 
 .collage-box { margin-top: 18px; display: grid; gap: 12px; justify-items: center; }
 .collage { width: 100%; border-radius: 14px; }
+.hide-note { display: block; margin-top: 10px; font-size: 1rem; line-height: 1.4; color: var(--gold, #e8c872); }

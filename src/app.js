@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261019n';
-import { CODE_HASHES } from './codes.js?v=20261019n';
-import { hashCode } from './hash.js?v=20261019n';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261019n';
-import { portrait, medalSVG } from './emblem.js?v=20261019n';
-import { renderPuzzles } from './puzzles.js?v=20261019n';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261023a';
+import { CODE_HASHES } from './codes.js?v=20261023a';
+import { hashCode } from './hash.js?v=20261023a';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261023a';
+import { portrait, medalSVG } from './emblem.js?v=20261023a';
+import { renderPuzzles } from './puzzles.js?v=20261023a';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
@@ -282,7 +282,7 @@ function giftReveal(chest) {
   photo.src = `assets/gifts/${chest.id}.jpg`;
   photo.onload = () => gift.prepend(photo);
   gift.append(h('p', { class: 'gift-name' }, hasGift ? chest.gift.name : 'Un regalo sorpresa'));
-  if (!hasGift) gift.append(h('small', {}, 'Esteban te lo entrega en persona.'));
+  gift.append(h('small', { class: 'hide-note' }, '🏠 Tu regalo está escondido en algún lugar de la casa. ¡A buscarlo!'));
   const node = overlay(
     h('p', { class: 'eyebrow' }, '¡Cofre abierto!'),
     h('div', { class: 'medal-wrap', html: medalSVG(pad(chest.id)) }),
@@ -310,6 +310,7 @@ function chestPanel(chest) {
       { class: 'panel' },
       h('h3', {}, 'Tu regalo'),
       h('p', { class: 'gift-name' }, chest.gift?.name ?? 'Un regalo sorpresa'),
+      h('p', { class: 'hint-msg' }, '🏠 Está escondido en algún lugar de la casa.'),
     );
   }
   if (chestDoneCount(chest) < 3) {
