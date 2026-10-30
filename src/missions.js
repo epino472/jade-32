@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261023a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261030a';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -64,7 +64,7 @@ export const CHESTS = [
     id: 4,
     title: 'Velocista Renacida',
     story: 'La pista antigua vuelve a encenderse. Los espíritus de las velocistas esperan a que Piyi recuerde cómo vuela.',
-    gift: { name: 'Calzas deportivas Adidas' },
+    gift: { name: 'Calzas deportivas Adidas + atuendo de pádel Adidas' },
     tasks: [T10, physical(
         'Velocista Renacida',
         'Sprints al 90%, volviendo caminando para recuperarte por completo entre cada uno.',
@@ -88,7 +88,7 @@ export const CHESTS = [
     id: 6,
     title: 'El Festín Oculto',
     story: 'El banquete del reino está escondido entre las letras. Solo quien encuentra cada plato puede sentarse a la mesa.',
-    gift: { name: 'Atuendo de pádel Adidas' },
+    gift: GIFT_PENDING,
     tasks: [T16, physical(
         'Fuerza de Piernas',
         'La última sesión pesada antes de la carrera. En la Speediance, 3 rondas con 90 segundos de descanso entre rondas.',
@@ -124,7 +124,7 @@ export const CHESTS = [
     id: 9,
     title: 'La Víspera',
     story: 'Mañana es la gran carrera. Esta noche, el reino entero se prepara contigo.',
-    gift: { name: 'Polera Train-T Running ON' },
+    gift: GIFT_PENDING,
     tasks: [T25, physical(
         'El Ritual de la Víspera',
         'Hoy se descansa casi todo: tu misión es llegar fresca a mañana.',
