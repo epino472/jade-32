@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261030b';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261103a';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -88,7 +88,7 @@ export const CHESTS = [
     id: 6,
     title: 'El Festín Oculto',
     story: 'El banquete del reino está escondido entre las letras. Solo quien encuentra cada plato puede sentarse a la mesa.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Aceite para el pelo Kérastase' },
     tasks: [T16, physical(
         'Fuerza de Piernas',
         'La última sesión pesada antes de la carrera. En la Speediance, 3 rondas con 90 segundos de descanso entre rondas.',
@@ -100,7 +100,7 @@ export const CHESTS = [
     id: 7,
     title: 'Los Objetos Faltantes',
     story: 'Alguien se llevó objetos del santuario. La heroína debe descubrir qué falta.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Productos K-beauty' },
     tasks: [T19, physical(
         'Ensayo General',
         'Controla el ritmo: que los tres kilómetros salgan casi iguales.',
