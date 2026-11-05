@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261103a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261105a';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -67,9 +67,9 @@ export const CHESTS = [
     gift: { name: 'Atuendo Padel Adidas' },
     tasks: [T10, physical(
         'Velocista Renacida',
-        'Sprints al 90%, volviendo caminando para recuperarte por completo entre cada uno.',
+        'Sprints al 85%, volviendo caminando para recuperarte por completo entre cada uno.',
         'La pista antigua vuelve a encenderse. Los espíritus de las velocistas esperan a que Piyi recuerde cómo vuela.',
-        ['10 minutos de trote y movilidad de calentamiento', '3 salidas de 30 m, como en una largada', '6 sprints de 100 m', '5 minutos de trote suave para volver a la calma'],
+        ['10 minutos de trote y movilidad de calentamiento', '3 salidas de 30 m, como en una largada', '4 sprints de 100 m', '5 minutos de trote suave para volver a la calma'],
       ), T12],
   },
   {
@@ -81,7 +81,7 @@ export const CHESTS = [
         'La Ruta de los Faroles',
         'Tu salida larga de la semana, a ritmo conversacional: tienes que poder hablar mientras corres.',
         'Un camino de farolillos rojos se pierde en el horizonte. Hoy se recorre sin prisa, pero sin parar.',
-        ['12 km a ritmo suave, sin mirar el reloj más de lo necesario'],
+        ['9 km a ritmo suave, sin mirar el reloj más de lo necesario'],
       ), T15],
   },
   {
@@ -91,9 +91,9 @@ export const CHESTS = [
     gift: { name: 'Aceite para el pelo Kérastase' },
     tasks: [T16, physical(
         'Fuerza de Piernas',
-        'La última sesión pesada antes de la carrera. En la Speediance, 3 rondas con 90 segundos de descanso entre rondas.',
+        'La última sesión pesada antes de la carrera. En la Speediance, 2 rondas con 90 segundos de descanso entre rondas.',
         'El Guardián de Hierro vuelve a la puerta. Esta vez las piernas son su armadura.',
-        ['10 sentadillas con 30 kg', '10 hip thrust con 70 kg', '12 zancadas, 6 por pierna, con 10 kg', '10 peso muerto rumano con 40 kg', 'Plancha lateral de 30 segundos por lado'],
+        ['10 sentadillas con 25 kg', '10 hip thrust con 60 kg', '10 zancadas, 5 por pierna, con 8 kg', '10 peso muerto rumano con 30 kg', 'Plancha lateral de 20 segundos por lado'],
       ), T18],
   },
   {
@@ -103,9 +103,9 @@ export const CHESTS = [
     gift: { name: 'Productos K-beauty' },
     tasks: [T19, physical(
         'Ensayo General',
-        'Controla el ritmo: que los tres kilómetros salgan casi iguales.',
+        'Controla el ritmo: que los dos kilómetros salgan casi iguales.',
         'Falta una semana para la gran carrera. El reino ensaya contigo, kilómetro a kilómetro.',
-        ['10 minutos de trote suave de calentamiento', '3 repeticiones de 1 km a 5:25 por km (tu ritmo de carrera), con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
+        ['10 minutos de trote suave de calentamiento', '2 repeticiones de 1 km a 5:40 por km (un ritmo cómodo), con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
       ), T21],
   },
   {
@@ -117,7 +117,7 @@ export const CHESTS = [
         'Afinando la Máquina',
         'Que las piernas se sientan ligeras, nunca cansadas.',
         'Antes de la gran batalla, la heroína afina cuerpo y espíritu. Hoy no se fuerza: se prepara.',
-        ['4 km de trote suave', '6 aceleraciones relajadas de 80 m, caminando de vuelta'],
+        ['3 km de trote suave', '4 aceleraciones relajadas de 60 m, caminando de vuelta'],
       ), T24],
   },
   {
@@ -129,7 +129,7 @@ export const CHESTS = [
         'El Ritual de la Víspera',
         'Hoy se descansa casi todo: tu misión es llegar fresca a mañana.',
         'Mañana es la gran carrera. Esta noche, el reino entero se prepara contigo.',
-        ['2 km de trote muy suave', '10 minutos de movilidad', 'Deja lista tu ropa, tu número y tu desayuno para mañana'],
+        ['30 minutos de caminata suave'],
       ), T27],
   },
   {
