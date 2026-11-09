@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261105a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261109a';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -91,9 +91,9 @@ export const CHESTS = [
     gift: { name: 'Aceite para el pelo Kérastase' },
     tasks: [T16, physical(
         'Fuerza de Piernas',
-        'La última sesión pesada antes de la carrera. En la Speediance, 2 rondas con 90 segundos de descanso entre rondas.',
+        'Sesión suave para activar las piernas antes de la carrera. En la Speediance, 2 rondas livianas con 90 segundos de descanso entre rondas.',
         'El Guardián de Hierro vuelve a la puerta. Esta vez las piernas son su armadura.',
-        ['10 sentadillas con 25 kg', '10 hip thrust con 60 kg', '10 zancadas, 5 por pierna, con 8 kg', '10 peso muerto rumano con 30 kg', 'Plancha lateral de 20 segundos por lado'],
+        ['8 sentadillas con 15 kg', '8 hip thrust con 40 kg', '8 zancadas, 4 por pierna, con 4 kg', '8 peso muerto rumano con 20 kg', 'Plancha lateral de 15 segundos por lado'],
       ), T18],
   },
   {
@@ -103,9 +103,9 @@ export const CHESTS = [
     gift: { name: 'Productos K-beauty' },
     tasks: [T19, physical(
         'Ensayo General',
-        'Controla el ritmo: que los dos kilómetros salgan casi iguales.',
+        'Un trote cómodo para soltar las piernas, sin mirar el reloj.',
         'Falta una semana para la gran carrera. El reino ensaya contigo, kilómetro a kilómetro.',
-        ['10 minutos de trote suave de calentamiento', '2 repeticiones de 1 km a 5:40 por km (un ritmo cómodo), con 2 minutos de trote entre cada una', '5 minutos de trote suave para volver a la calma'],
+        ['15 minutos de trote muy suave', '3 aceleraciones relajadas de 60 m, caminando de vuelta', '5 minutos de caminata para volver a la calma'],
       ), T21],
   },
   {
@@ -117,7 +117,7 @@ export const CHESTS = [
         'Afinando la Máquina',
         'Que las piernas se sientan ligeras, nunca cansadas.',
         'Antes de la gran batalla, la heroína afina cuerpo y espíritu. Hoy no se fuerza: se prepara.',
-        ['3 km de trote suave', '4 aceleraciones relajadas de 60 m, caminando de vuelta'],
+        ['2 km de trote muy suave', '3 aceleraciones relajadas de 50 m, caminando de vuelta'],
       ), T24],
   },
   {
