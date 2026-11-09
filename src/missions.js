@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261109a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261109b';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -93,7 +93,7 @@ export const CHESTS = [
         'Fuerza de Piernas',
         'Sesión suave para activar las piernas antes de la carrera. En la Speediance, 2 rondas livianas con 90 segundos de descanso entre rondas.',
         'El Guardián de Hierro vuelve a la puerta. Esta vez las piernas son su armadura.',
-        ['8 sentadillas con 15 kg', '8 hip thrust con 40 kg', '8 zancadas, 4 por pierna, con 4 kg', '8 peso muerto rumano con 20 kg', 'Plancha lateral de 15 segundos por lado'],
+        ['8 sentadillas con 15 kg', '8 hip thrust con 30 kg', '8 zancadas, 4 por pierna, con 4 kg', '8 peso muerto rumano con 20 kg', 'Plancha lateral de 15 segundos por lado'],
       ), T18],
   },
   {

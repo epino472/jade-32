@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261109a';
-import { CODE_HASHES } from './codes.js?v=20261109a';
-import { hashCode } from './hash.js?v=20261109a';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261109a';
-import { portrait, medalSVG } from './emblem.js?v=20261109a';
-import { renderPuzzles } from './puzzles.js?v=20261109a';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261109b';
+import { CODE_HASHES } from './codes.js?v=20261109b';
+import { hashCode } from './hash.js?v=20261109b';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261109b';
+import { portrait, medalSVG } from './emblem.js?v=20261109b';
+import { renderPuzzles } from './puzzles.js?v=20261109b';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
