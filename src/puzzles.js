@@ -1,4 +1,4 @@
-import { SCENES } from './scenes.js?v=20261112a';
+import { SCENES } from './scenes.js?v=20261114a';
 
 const strip = (s) =>
   s

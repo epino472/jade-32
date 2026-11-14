@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261112a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261114a';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -124,7 +124,7 @@ export const CHESTS = [
     id: 9,
     title: 'La Víspera',
     story: 'Mañana es la gran carrera. Esta noche, el reino entero se prepara contigo.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Shampoo Kérastase' },
     tasks: [T25, physical(
         'El Ritual de la Víspera',
         'Hoy se descansa casi todo: tu misión es llegar fresca a mañana.',
