@@ -1,4 +1,4 @@
-import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261114a';
+import { T0, P2, P3, T1, T3, T4, T6, T7, T9, T10, T12, T13, T15, T16, T18, T19, T21, T22, T24, T25, T27, T29, T30 } from './bank.js?v=20261114b';
 
 // 10 cofres (misiones) x 3 pruebas = 30 pruebas, una por día desde START_DATE.
 // Cada cofre: 2 pruebas de lógica (I) + 1 física (F). Al completar las 3 se abre
@@ -136,7 +136,7 @@ export const CHESTS = [
     id: 10,
     title: 'El Jefe Final',
     story: 'Llegó el día. Diez kilómetros separan a la Velocista de Jade de la gloria, y al final espera el último guardián del Nivel 32.',
-    gift: GIFT_PENDING,
+    gift: { name: 'Bruma corporal Biotherm' },
     tasks: [
       physical(
         'La Gran Carrera',
