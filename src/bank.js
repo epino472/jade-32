@@ -37,7 +37,17 @@ const cipher = (text, shift, plain) => ({
 const CIPHER_1 = cipher('OD SHUVHYHUDQFLD HV OD OODYH GH OD PHWD', 3, 'la perseverancia es la llave de la meta');
 const CIPHER_2 = cipher('RUY MXGTJKY IGSHOUY KSVOKFGT IUT VKWAKTUY VGYUY', 6, 'los grandes cambios empiezan con pequenos pasos');
 const CIPHER_3 = cipher('IVIW QEW JYIVXI UYI IP LMIVVS C QEW VETMHE UYI IP ZMIRXS', 4, 'eres mas fuerte que el hierro y mas rapida que el viento');
-const CIPHER_FINAL = cipher('KJQNE HZRUQJFSTX UNDN JWJX QF RJOTW', 5, 'feliz cumpleanos piyi eres la mejor');
+const ANAGRAMAS_FINAL = {
+  type: 'anagram',
+  title: 'Palabras de la celebración',
+  seed: 17,
+  words: [
+    { answer: 'FELIZ', clue: 'Cómo queremos que estés hoy' },
+    { answer: 'REGALO', clue: 'Lo que está escondido por la casa' },
+    { answer: 'MEDALLA', clue: 'Se cuelga al cruzar la meta' },
+    { answer: 'VELOCISTA', clue: 'Corredora rápida en distancias cortas' },
+  ],
+};
 
 /* ---------- Secuencias y ecuaciones ---------- */
 const SEQ_A = {
@@ -577,8 +587,8 @@ export const T29 = game(
 export const T30 = game(
   'El Jefe Final',
   'El último guardián del Nivel 32 hace sus preguntas finales. Responde con todo lo aprendido.',
-  'Completa el crucigrama, responde la trivia final, escucha el mensaje, descifra el código y contesta el acertijo.',
-  [CRUCI_FINAL, TRIVIA_FINAL, CHINO_FINAL, CIPHER_FINAL, R_FINAL],
+  'Completa el crucigrama, responde la trivia final, escucha el mensaje, ordena las palabras y contesta el acertijo.',
+  [CRUCI_FINAL, TRIVIA_FINAL, CHINO_FINAL, ANAGRAMAS_FINAL, R_FINAL],
 );
 
 /* ---------- Práctica extra (no cuenta dentro de las 30) ---------- */
