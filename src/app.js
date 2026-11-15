@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261114d';
-import { CODE_HASHES } from './codes.js?v=20261114d';
-import { hashCode } from './hash.js?v=20261114d';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261114d';
-import { portrait, medalSVG } from './emblem.js?v=20261114d';
-import { renderPuzzles } from './puzzles.js?v=20261114d';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261114e';
+import { CODE_HASHES } from './codes.js?v=20261114e';
+import { hashCode } from './hash.js?v=20261114e';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261114e';
+import { portrait, medalSVG } from './emblem.js?v=20261114e';
+import { renderPuzzles } from './puzzles.js?v=20261114e';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
@@ -286,7 +286,7 @@ function giftReveal(chest) {
   const node = overlay(
     h('p', { class: 'eyebrow' }, '¡Cofre abierto!'),
     h('div', { class: 'medal-wrap', html: medalSVG(pad(chest.id)) }),
-    h('h2', {}, last ? '¡Feliz cumpleaños, Piyi!' : '¡Te has ganado!'),
+    h('h2', {}, '¡Te has ganado!'),
     gift,
     h(
       'button',
@@ -599,7 +599,7 @@ async function makeCollage(photos) {
   g.textAlign = 'center';
   g.fillStyle = '#e8c872';
   g.font = '700 84px ui-serif, Georgia, serif';
-  g.fillText('¡Feliz Cumpleaños', W / 2, 150);
+  g.fillText('¡Feliz Cumpleaños,', W / 2, 150);
   g.fillText('Amor!', W / 2, 250);
   const imgs = await Promise.all(photos.map(loadImg));
   imgs.forEach((img, i) => {
@@ -670,8 +670,8 @@ async function chronicle() {
       const url = await makeCollage(shots);
       make.remove();
       collageBox.append(
-        h('img', { class: 'collage', src: url, alt: '¡Feliz Cumpleaños Amor!' }),
-        shareButton(url, '¡Feliz Cumpleaños Amor!', 'collage.jpg', '📤 Enviar mi collage'),
+        h('img', { class: 'collage', src: url, alt: '¡Feliz Cumpleaños, Amor!' }),
+        shareButton(url, '¡Feliz Cumpleaños, Amor!', 'collage.jpg', '📤 Enviar mi collage'),
         h('p', { class: 'hint-msg' }, 'Si no ves el botón, deja el dedo apretado sobre la imagen y elige Guardar.'),
       );
     } catch {
