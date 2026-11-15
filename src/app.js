@@ -1,9 +1,9 @@
-import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261114c';
-import { CODE_HASHES } from './codes.js?v=20261114c';
-import { hashCode } from './hash.js?v=20261114c';
-import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261114c';
-import { portrait, medalSVG } from './emblem.js?v=20261114c';
-import { renderPuzzles } from './puzzles.js?v=20261114c';
+import { CHESTS, TASKS, PRACTICE, START_DATE, TYPE_LABEL } from './missions.js?v=20261114d';
+import { CODE_HASHES } from './codes.js?v=20261114d';
+import { hashCode } from './hash.js?v=20261114d';
+import { store, savePhoto, getPhoto, resizeImage } from './store.js?v=20261114d';
+import { portrait, medalSVG } from './emblem.js?v=20261114d';
+import { renderPuzzles } from './puzzles.js?v=20261114d';
 
 const APP_VERSION = new URL(import.meta.url).searchParams.get('v') ?? 'sin versión';
 if ('serviceWorker' in navigator) {
@@ -286,7 +286,7 @@ function giftReveal(chest) {
   const node = overlay(
     h('p', { class: 'eyebrow' }, '¡Cofre abierto!'),
     h('div', { class: 'medal-wrap', html: medalSVG(pad(chest.id)) }),
-    h('h2', {}, '¡Te has ganado!'),
+    h('h2', {}, last ? '¡Feliz cumpleaños, Piyi!' : '¡Te has ganado!'),
     gift,
     h(
       'button',
@@ -640,6 +640,7 @@ async function chronicle() {
       h('p', { class: 'eyebrow center' }, 'Crónica'),
       h('h1', {}, 'Piyi, la Velocista de Jade'),
       divider(),
+      h('h2', { class: 'center' }, '¡Feliz cumpleaños, Piyi! 🎂'),
       h('p', { class: 'lead' }, 'Nivel 32. Treinta pruebas de cuerpo y mente, y este es su registro.'),
       h('h3', {}, 'Tus regalos'),
       gifts,
